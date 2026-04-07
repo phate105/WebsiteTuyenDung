@@ -1,39 +1,113 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
-    @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="codepixer">
+    <title>@ViewBag.Title - Job Finder</title>
+
+    <link rel="shortcut icon" href="~/Content/img/fav.png">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,400,300,500,600,700" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/Content/css/linearicons.css">
+    <link rel="stylesheet" href="~/Content/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/Content/css/bootstrap.css">
+    <link rel="stylesheet" href="~/Content/css/magnific-popup.css">
+    <link rel="stylesheet" href="~/Content/css/nice-select.css">
+    <link rel="stylesheet" href="~/Content/css/animate.min.css">
+    <link rel="stylesheet" href="~/Content/css/owl.carousel.css">
+    <link rel="stylesheet" href="~/Content/css/main.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+    <header id="header">
         <div class="container">
-            @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                </ul>
+            <div class="row align-items-center justify-content-between d-flex">
+                <div id="logo">
+                    <a href="@Url.Action("Index", "Home")"><img src="~/Content/img/logo.png" alt="" title="" /></a>
+                </div>
+                <nav id="nav-menu-container">
+                    <ul class="nav-menu">
+                        <li class="menu-active"><a href="@Url.Action("Index", "Home")">Home</a></li>
+
+                        <li><a href="@Url.Action("About", "Home")">About Us</a></li>
+
+                        <li><a href="@Url.Action("Index", "Job")">Category</a></li>
+
+                        <li class="menu-has-children">
+                            <a href="">Pages</a>
+                            <ul>
+                                <li><a href="#">Elements</a></li>
+                                <li><a href="@Url.Action("Search", "Job")">Search</a></li>
+                            </ul>
+                        </li>
+                        <li><a class="ticker-btn" href="@Url.Action("Register", "Account")">Signup</a></li>
+                        <li><a class="ticker-btn" href="@Url.Action("Login", "Account")">Login</a></li>
+                    </ul>
+                </nav>
             </div>
         </div>
-    </nav>
-    <div class="container body-content">
+    </header>
+
+    <div class="main-content">
         @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
+    <footer class="footer-area section-gap">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-12">
+                    <div class="single-footer-widget">
+                        <h6>Top Products</h6>
+                        <ul class="footer-nav">
+                            <li><a href="#">Managed Website</a></li>
+                            <li><a href="#">Power Tools</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <div class="single-footer-widget newsletter">
+                        <h6>Newsletter</h6>
+                        <p>You can trust us. we only send promo offers, not a single spam.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-12">
+                    <div class="single-footer-widget mail-chimp">
+                        <h6 class="mb-20">Instagram Feed</h6>
+                        <ul class="instafeed d-flex flex-wrap">
+                            <li><img src="~/Content/img/i1.jpg" alt=""></li>
+                            <li><img src="~/Content/img/i2.jpg" alt=""></li>
+                            <li><img src="~/Content/img/i3.jpg" alt=""></li>
+                            <li><img src="~/Content/img/i4.jpg" alt=""></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row footer-bottom d-flex justify-content-between">
+                <p class="col-lg-8 col-sm-12 footer-text m-0 text-white">
+                    Copyright &copy; @DateTime.Now.Year All rights reserved
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    @*@Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")*@
+
+    <script src="~/Scripts/js/vendor/jquery-2.2.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="~/Scripts/js/vendor/bootstrap.min.js"></script>
+    <script src="~/Scripts/js/easing.min.js"></script>
+    <script src="~/Scripts/js/hoverIntent.js"></script>
+    <script src="~/Scripts/js/superfish.min.js"></script>
+    <script src="~/Scripts/js/jquery.ajaxchimp.min.js"></script>
+    <script src="~/Scripts/js/jquery.magnific-popup.min.js"></script>
+    <script src="~/Scripts/js/owl.carousel.min.js"></script>
+    <script src="~/Scripts/js/jquery.sticky.js"></script>
+    <script src="~/Scripts/js/jquery.nice-select.min.js"></script>
+    <script src="~/Scripts/js/parallax.min.js"></script>
+    <script src="~/Scripts/js/mail-script.js"></script>
+    <script src="~/Scripts/js/main.js"></script>
+
     @RenderSection("scripts", required: false)
 </body>
 </html>
