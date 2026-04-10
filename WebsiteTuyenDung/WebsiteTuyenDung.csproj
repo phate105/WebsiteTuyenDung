@@ -132,15 +132,24 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202604051259297_InitialCreate.cs" />
-    <Compile Include="Migrations\202604051259297_InitialCreate.Designer.cs">
-      <DependentUpon>202604051259297_InitialCreate.cs</DependentUpon>
+    <Compile Include="Migrations\202604101301018_FixHoSoCty.cs" />
+    <Compile Include="Migrations\202604101301018_FixHoSoCty.Designer.cs">
+      <DependentUpon>202604101301018_FixHoSoCty.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\ApplicationDbContext.cs" />
+    <Compile Include="Models\ApplicationDbContextt.cs" />
     <Compile Include="Models\CongTy.cs" />
     <Compile Include="Models\DanhMuc.cs" />
     <Compile Include="Models\DonUngTuyen.cs" />
+    <Compile Include="Models\Entities\DonUngTuyenn.cs" />
+    <Compile Include="Models\Entities\TinTuyenDungg.cs" />
+    <Compile Include="Models\Entities\HoSoCaNhan.cs" />
+    <Compile Include="Models\Entities\CVUngVien.cs" />
+    <Compile Include="Models\Entities\VaiTro.cs" />
+    <Compile Include="Models\Entities\HoSoCty.cs" />
+    <Compile Include="Models\Entities\NguoiDung.cs" />
+    <Compile Include="Models\Enums\TrangThaiTin.cs" />
+    <Compile Include="Models\Enums\TrangThaiDon.cs" />
     <Compile Include="Models\HoSoUngVien.cs" />
     <Compile Include="Models\TaiKhoan.cs" />
     <Compile Include="Models\TinTuyenDung.cs" />
@@ -330,6 +339,7 @@
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Job\Index.cshtml" />
+    <Content Include="Web1.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -364,8 +374,8 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202604051259297_InitialCreate.resx">
-      <DependentUpon>202604051259297_InitialCreate.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202604101301018_FixHoSoCty.resx">
+      <DependentUpon>202604101301018_FixHoSoCty.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

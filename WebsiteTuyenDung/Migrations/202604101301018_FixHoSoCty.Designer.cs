@@ -7,13 +7,13 @@ namespace WebsiteTuyenDung.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class InitialCreate : IMigrationMetadata
+    public sealed partial class FixHoSoCty : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(FixHoSoCty));
         
         string IMigrationMetadata.Id
         {
-            get { return "202604051259297_InitialCreate"; }
+            get { return "202604101301018_FixHoSoCty"; }
         }
         
         string IMigrationMetadata.Source
