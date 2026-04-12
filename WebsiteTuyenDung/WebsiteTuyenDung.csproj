@@ -132,27 +132,33 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202604101301018_FixHoSoCty.cs" />
-    <Compile Include="Migrations\202604101301018_FixHoSoCty.Designer.cs">
-      <DependentUpon>202604101301018_FixHoSoCty.cs</DependentUpon>
+    <Compile Include="Migrations\202604120906204_InitDb.cs" />
+    <Compile Include="Migrations\202604120906204_InitDb.Designer.cs">
+      <DependentUpon>202604120906204_InitDb.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604120912483_AddMoreTables.cs" />
+    <Compile Include="Migrations\202604120912483_AddMoreTables.Designer.cs">
+      <DependentUpon>202604120912483_AddMoreTables.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604120924422_UpdateNganhNgheAndDiaDiem.cs" />
+    <Compile Include="Migrations\202604120924422_UpdateNganhNgheAndDiaDiem.Designer.cs">
+      <DependentUpon>202604120924422_UpdateNganhNgheAndDiaDiem.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\ApplicationDbContextt.cs" />
-    <Compile Include="Models\CongTy.cs" />
-    <Compile Include="Models\DanhMuc.cs" />
-    <Compile Include="Models\DonUngTuyen.cs" />
-    <Compile Include="Models\Entities\DonUngTuyenn.cs" />
-    <Compile Include="Models\Entities\TinTuyenDungg.cs" />
-    <Compile Include="Models\Entities\HoSoCaNhan.cs" />
-    <Compile Include="Models\Entities\CVUngVien.cs" />
+    <Compile Include="Models\ApplicationDbContext.cs" />
+    <Compile Include="Models\Entities\CapDoKinhNghiem.cs" />
+    <Compile Include="Models\Entities\LichSuTrangThaiDon.cs" />
+    <Compile Include="Models\Entities\NhatKyDuyetTin.cs" />
+    <Compile Include="Models\Entities\LoaiHinhLamViec.cs" />
+    <Compile Include="Models\Entities\DiaDiem.cs" />
+    <Compile Include="Models\Entities\NganhNghe.cs" />
     <Compile Include="Models\Entities\VaiTro.cs" />
-    <Compile Include="Models\Entities\HoSoCty.cs" />
+    <Compile Include="Models\Entities\CVUngVien.cs" />
+    <Compile Include="Models\Entities\DonUngTuyen.cs" />
+    <Compile Include="Models\Entities\TinTuyenDung.cs" />
+    <Compile Include="Models\Entities\HoSoCaNhan.cs" />
+    <Compile Include="Models\Entities\HoSoCongTy.cs" />
     <Compile Include="Models\Entities\NguoiDung.cs" />
-    <Compile Include="Models\Enums\TrangThaiTin.cs" />
-    <Compile Include="Models\Enums\TrangThaiDon.cs" />
-    <Compile Include="Models\HoSoUngVien.cs" />
-    <Compile Include="Models\TaiKhoan.cs" />
-    <Compile Include="Models\TinTuyenDung.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -374,8 +380,14 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202604101301018_FixHoSoCty.resx">
-      <DependentUpon>202604101301018_FixHoSoCty.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202604120906204_InitDb.resx">
+      <DependentUpon>202604120906204_InitDb.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604120912483_AddMoreTables.resx">
+      <DependentUpon>202604120912483_AddMoreTables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604120924422_UpdateNganhNgheAndDiaDiem.resx">
+      <DependentUpon>202604120924422_UpdateNganhNgheAndDiaDiem.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
