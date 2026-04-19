@@ -1,0 +1,22 @@
+﻿@model WebsiteTuyenDung.Models.ViewModels.HoSoCongTyFormViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chỉnh sửa hồ sơ công ty";
+    ViewBag.PageTitle = "Chỉnh sửa hồ sơ công ty";
+    ViewBag.PageDescription = "Cập nhật thông tin doanh nghiệp, logo và kênh liên hệ để hồ sơ công ty sẵn sàng cho demo.";
+    ViewBag.SubmitText = "Cập nhật hồ sơ";
+}
+
+<div class="box box-warning">
+    <div class="box-header with-border">
+        <h3 class="box-title">Cập nhật hồ sơ công ty</h3>
+    </div>
+
+    @using (Html.BeginForm("Edit", "HoSoCongTy", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.HoSoCongTyId)
+        @Html.Partial("_Form", Model)
+    }
+</div>

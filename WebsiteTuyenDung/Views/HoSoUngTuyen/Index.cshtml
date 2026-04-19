@@ -1,0 +1,89 @@
+﻿@using System.Collections.Generic
+@using System.Linq
+@using WebsiteTuyenDung.Models.Constants
+@model WebsiteTuyenDung.Models.ViewModels.HoSoUngTuyenIndexViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Hồ sơ ứng tuyển";
+    ViewBag.PageTitle = "Hồ sơ ứng tuyển";
+    ViewBag.PageDescription = "Xem và lọc các đơn ứng tuyển thuộc các tin của công ty bạn.";
+    var trangThaiOptions = new List<SelectListItem>
+    {
+        new SelectListItem { Value = TrangThaiDonUngTuyen.DaNop, Text = TrangThaiDonUngTuyen.ToDisplayText(TrangThaiDonUngTuyen.DaNop), Selected = Model.TrangThai == TrangThaiDonUngTuyen.DaNop },
+        new SelectListItem { Value = TrangThaiDonUngTuyen.DaXem, Text = TrangThaiDonUngTuyen.ToDisplayText(TrangThaiDonUngTuyen.DaXem), Selected = Model.TrangThai == TrangThaiDonUngTuyen.DaXem },
+        new SelectListItem { Value = TrangThaiDonUngTuyen.VaoDanhSachNgan, Text = TrangThaiDonUngTuyen.ToDisplayText(TrangThaiDonUngTuyen.VaoDanhSachNgan), Selected = Model.TrangThai == TrangThaiDonUngTuyen.VaoDanhSachNgan },
+        new SelectListItem { Value = TrangThaiDonUngTuyen.BiTuChoi, Text = TrangThaiDonUngTuyen.ToDisplayText(TrangThaiDonUngTuyen.BiTuChoi), Selected = Model.TrangThai == TrangThaiDonUngTuyen.BiTuChoi },
+        new SelectListItem { Value = TrangThaiDonUngTuyen.DuocChapNhan, Text = TrangThaiDonUngTuyen.ToDisplayText(TrangThaiDonUngTuyen.DuocChapNhan), Selected = Model.TrangThai == TrangThaiDonUngTuyen.DuocChapNhan },
+        new SelectListItem { Value = TrangThaiDonUngTuyen.DaRut, Text = TrangThaiDonUngTuyen.ToDisplayText(TrangThaiDonUngTuyen.DaRut), Selected = Model.TrangThai == TrangThaiDonUngTuyen.DaRut }
+    };
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Lọc hồ sơ ứng tuyển</h3>
+    </div>
+    <div class="box-body">
+        @using (Html.BeginForm("Index", "HoSoUngTuyen", FormMethod.Get, new { @class = "row" }))
+        {
+            <div class="col-md-5 form-group">
+                <label>Tin tuyển dụng</label>
+                @Html.DropDownList("tinTuyenDungId", Model.TinTuyenDungOptions, "Tất cả tin tuyển dụng", new { @class = "form-control" })
+            </div>
+            <div class="col-md-5 form-group">
+                <label>Trạng thái đơn</label>
+                @Html.DropDownList("trangThai", trangThaiOptions, "Tất cả trạng thái", new { @class = "form-control" })
+            </div>
+            <div class="col-md-2 form-group" style="padding-top: 24px;">
+                <button type="submit" class="btn btn-primary btn-block">Lọc</button>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Danh sách hồ sơ ứng tuyển</h3>
+    </div>
+    <div class="box-body table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Ứng viên</th>
+                    <th>Tin tuyển dụng</th>
+                    <th>CV</th>
+                    <th>Ngày nộp</th>
+                    <th>Trạng thái</th>
+                    <th>Ghi chú xử lý</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DonUngTuyens != null && Model.DonUngTuyens.Any())
+                {
+                    foreach (var item in Model.DonUngTuyens)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@(item.HoSoCaNhan != null ? item.HoSoCaNhan.HoTen : "Ứng viên")</strong><br />
+                                <small>@(item.HoSoCaNhan != null && item.HoSoCaNhan.ApplicationUser != null ? item.HoSoCaNhan.ApplicationUser.Email : string.Empty)</small>
+                            </td>
+                            <td>@(item.TinTuyenDung != null ? item.TinTuyenDung.TieuDe : "Tin tuyển dụng")</td>
+                            <td>@(item.CVUngVien != null ? item.CVUngVien.TenCV : "Chưa cập nhật")</td>
+                            <td>@item.NgayNop.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@TrangThaiDonUngTuyen.ToDisplayText(item.TrangThaiDon)</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.GhiChuXuLy) ? "-" : item.GhiChuXuLy)</td>
+                            <td><a href="@Url.Action("Details", "HoSoUngTuyen", new { id = item.DonUngTuyenId })" class="btn btn-info btn-xs">Chi tiết</a></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Chưa có hồ sơ ứng tuyển phù hợp.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

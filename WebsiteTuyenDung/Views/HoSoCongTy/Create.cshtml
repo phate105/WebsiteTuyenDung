@@ -1,0 +1,21 @@
+﻿@model WebsiteTuyenDung.Models.ViewModels.HoSoCongTyFormViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Tạo hồ sơ công ty";
+    ViewBag.PageTitle = "Tạo hồ sơ công ty";
+    ViewBag.PageDescription = "Mỗi tài khoản nhà tuyển dụng chỉ có một hồ sơ công ty. Hãy nhập đầy đủ thông tin để bắt đầu đăng tin.";
+    ViewBag.SubmitText = "Lưu hồ sơ";
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Thông tin công ty</h3>
+    </div>
+
+    @using (Html.BeginForm("Create", "HoSoCongTy", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Partial("_Form", Model)
+    }
+</div>

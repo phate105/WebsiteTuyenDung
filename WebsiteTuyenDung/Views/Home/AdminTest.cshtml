@@ -1,0 +1,137 @@
+﻿@model WebsiteTuyenDung.Models.ViewModels.AdminDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Dashboard admin";
+    ViewBag.PageTitle = "Dashboard admin";
+    ViewBag.PageDescription = "Theo dõi nhanh tình hình duyệt tin, hồ sơ và tài khoản trong hệ thống.";
+}
+
+<div class="row">
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-yellow">
+            <div class="inner">
+                <h3>@Model.SoTinChoDuyet</h3>
+                <p>Tin chờ duyệt</p>
+            </div>
+            <div class="icon"><i class="fa fa-clock-o"></i></div>
+            <a href="@Url.Action("Index", "KiemDuyetTinTuyenDung", new { trangThai = "ChoDuyet" })" class="small-box-footer">Đi đến kiểm duyệt <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-green">
+            <div class="inner">
+                <h3>@Model.SoTinDaDuyet</h3>
+                <p>Tin đã duyệt</p>
+            </div>
+            <div class="icon"><i class="fa fa-check-square-o"></i></div>
+            <a href="@Url.Action("Index", "KiemDuyetTinTuyenDung", new { trangThai = "DaDuyet" })" class="small-box-footer">Xem danh sách <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>@Model.SoTinBiTuChoi</h3>
+                <p>Tin bị từ chối</p>
+            </div>
+            <div class="icon"><i class="fa fa-ban"></i></div>
+            <a href="@Url.Action("Index", "KiemDuyetTinTuyenDung", new { trangThai = "BiTuChoi" })" class="small-box-footer">Xem lý do từ chối <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>@Model.SoTinDaDong</h3>
+                <p>Tin đã đóng</p>
+            </div>
+            <div class="icon"><i class="fa fa-lock"></i></div>
+            <a href="@Url.Action("Index", "KiemDuyetTinTuyenDung", new { trangThai = "DaDong" })" class="small-box-footer">Theo dõi vòng đời tin <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-blue"><i class="fa fa-building"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Hồ sơ công ty</span>
+                <span class="info-box-number">@Model.SoCongTy</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-green"><i class="fa fa-briefcase"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Nhà tuyển dụng</span>
+                <span class="info-box-number">@Model.SoNhaTuyenDung</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-orange"><i class="fa fa-user"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Ứng viên</span>
+                <span class="info-box-number">@Model.SoUngVien</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-purple"><i class="fa fa-file-text-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Tổng tin tuyển dụng</span>
+                <span class="info-box-number">@Model.TongTinTuyenDung</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-maroon"><i class="fa fa-send"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Tổng hồ sơ ứng tuyển</span>
+                <span class="info-box-number">@Model.TongDonUngTuyen</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-navy"><i class="fa fa-users"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Tổng tài khoản</span>
+                <span class="info-box-number">@Model.TongTaiKhoan</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Gợi ý vận hành</h3>
+    </div>
+    <div class="box-body">
+        <ol style="padding-left: 18px; margin-bottom: 0;">
+            <li>Ưu tiên xử lý các tin đang ở trạng thái chờ duyệt để employer không bị tắc luồng đăng bài.</li>
+            <li>Khi từ chối tin, nhập rõ lý do để nhà tuyển dụng biết chính xác nội dung cần chỉnh sửa.</li>
+            <li>Theo dõi thêm tổng tài khoản, tổng tin và tổng đơn để phát hiện sớm luồng nào đang bị nghẽn.</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <a href="@Url.Action("Index", "TaiKhoan")" class="btn btn-default btn-block">
+            <i class="fa fa-users"></i> Mở quản lý tài khoản
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="@Url.Action("Index", "ThongKe")" class="btn btn-default btn-block">
+            <i class="fa fa-bar-chart"></i> Mở thống kê chi tiết
+        </a>
+    </div>
+</div>

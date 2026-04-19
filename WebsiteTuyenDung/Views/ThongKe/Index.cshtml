@@ -1,0 +1,160 @@
+﻿@using System.Linq
+@model WebsiteTuyenDung.Models.ViewModels.AdminThongKeViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Thống kê";
+    ViewBag.PageTitle = "Thống kê hệ thống";
+    ViewBag.PageDescription = "Tổng hợp nhanh số liệu tài khoản, tin tuyển dụng, đơn ứng tuyển và mức độ hoạt động của doanh nghiệp.";
+}
+
+<div class="row">
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>@Model.TongTaiKhoan</h3>
+                <p>Tổng tài khoản</p>
+            </div>
+            <div class="icon"><i class="fa fa-users"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-green">
+            <div class="inner">
+                <h3>@Model.TongHoSoCongTy</h3>
+                <p>Hồ sơ công ty</p>
+            </div>
+            <div class="icon"><i class="fa fa-building"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-yellow">
+            <div class="inner">
+                <h3>@Model.TongTinTuyenDung</h3>
+                <p>Tổng tin tuyển dụng</p>
+            </div>
+            <div class="icon"><i class="fa fa-briefcase"></i></div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>@Model.TongDonUngTuyen</h3>
+                <p>Tổng đơn ứng tuyển</p>
+            </div>
+            <div class="icon"><i class="fa fa-send"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Thống kê trạng thái tin tuyển dụng</h3>
+            </div>
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Trạng thái</th>
+                            <th>Số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ThongKeTinTheoTrangThai ?? Enumerable.Empty<WebsiteTuyenDung.Models.ViewModels.AdminThongKeTrangThaiItemViewModel>())
+                        {
+                            <tr>
+                                <td>@item.TenHienThi</td>
+                                <td>@item.SoLuong</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Thống kê trạng thái đơn ứng tuyển</h3>
+            </div>
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Trạng thái</th>
+                            <th>Số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ThongKeDonTheoTrangThai ?? Enumerable.Empty<WebsiteTuyenDung.Models.ViewModels.AdminThongKeTrangThaiItemViewModel>())
+                        {
+                            <tr>
+                                <td>@item.TenHienThi</td>
+                                <td>@item.SoLuong</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-blue"><i class="fa fa-user"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Ứng viên</span>
+                <span class="info-box-number">@Model.TongUngVien</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-green"><i class="fa fa-handshake-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Nhà tuyển dụng</span>
+                <span class="info-box-number">@Model.TongNhaTuyenDung</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="box box-default">
+    <div class="box-header with-border">
+        <h3 class="box-title">Top công ty theo mức độ hoạt động</h3>
+    </div>
+    <div class="box-body table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Công ty</th>
+                    <th>Tin tuyển dụng</th>
+                    <th>Đơn ứng tuyển</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.TopCongTyTheoHoatDong != null && Model.TopCongTyTheoHoatDong.Any())
+                {
+                    foreach (var item in Model.TopCongTyTheoHoatDong)
+                    {
+                        <tr>
+                            <td>@item.TenCongTy</td>
+                            <td>@item.SoTinTuyenDung</td>
+                            <td>@item.SoDonUngTuyen</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center">Chưa có dữ liệu công ty để thống kê.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

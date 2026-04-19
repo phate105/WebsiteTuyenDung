@@ -1,0 +1,118 @@
+﻿@model WebsiteTuyenDung.Models.Entities.TinTuyenDung
+@using System.Linq
+@using WebsiteTuyenDung.Models.Constants
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chi tiết tin tuyển dụng";
+    ViewBag.PageTitle = "Chi tiết tin tuyển dụng";
+    ViewBag.PageDescription = "Xem nhanh đầy đủ nội dung tin, trạng thái hiện tại và nhật ký duyệt.";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">@Model.TieuDe</h3>
+            </div>
+            <div class="box-body">
+                <dl class="dl-horizontal">
+                    <dt>Công ty</dt>
+                    <dd>@(Model.HoSoCongTy != null ? Model.HoSoCongTy.TenCongTy : "Chưa cập nhật")</dd>
+                    <dt>Ngành nghề</dt>
+                    <dd>@(Model.NganhNghe != null ? Model.NganhNghe.TenNganhNghe : "Chưa cập nhật")</dd>
+                    <dt>Địa điểm</dt>
+                    <dd>@(Model.DiaDiem != null ? Model.DiaDiem.TenDiaDiem : "Chưa cập nhật")</dd>
+                    <dt>Loại hình làm việc</dt>
+                    <dd>@(Model.LoaiHinhLamViec != null ? Model.LoaiHinhLamViec.TenLoaiHinhLamViec : "Chưa cập nhật")</dd>
+                    <dt>Cấp độ kinh nghiệm</dt>
+                    <dd>@(Model.CapDoKinhNghiem != null ? Model.CapDoKinhNghiem.TenCapDoKinhNghiem : "Chưa cập nhật")</dd>
+                    <dt>Mô tả công việc</dt>
+                    <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.MoTaCongViec) ? "Chưa cập nhật" : Model.MoTaCongViec)</dd>
+                    <dt>Yêu cầu</dt>
+                    <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.YeuCau) ? "Chưa cập nhật" : Model.YeuCau)</dd>
+                    <dt>Quyền lợi</dt>
+                    <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.QuyenLoi) ? "Chưa cập nhật" : Model.QuyenLoi)</dd>
+                    <dt>Số lượng tuyển</dt>
+                    <dd>@Model.SoLuongTuyen</dd>
+                    <dt>Lương</dt>
+                    <dd>
+                        @if (Model.LuongToiThieu.HasValue || Model.LuongToiDa.HasValue)
+                        {
+                            var luongToiThieu = Model.LuongToiThieu.HasValue ? string.Format("{0:#,##0}", Model.LuongToiThieu.Value) : "Thỏa thuận";
+                            var luongToiDa = Model.LuongToiDa.HasValue ? string.Format("{0:#,##0}", Model.LuongToiDa.Value) : "Thỏa thuận";
+                            @(string.Format("{0} - {1} VNĐ", luongToiThieu, luongToiDa))
+                        }
+                        else
+                        {
+                            <span>Thỏa thuận</span>
+                        }
+                    </dd>
+                    <dt>Hạn nộp hồ sơ</dt>
+                    <dd>@Model.HanNopHoSo.ToString("dd/MM/yyyy")</dd>
+                    <dt>Ngày tạo</dt>
+                    <dd>@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dt>Ngày cập nhật</dt>
+                    <dd>@Model.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dt>Trạng thái</dt>
+                    <dd><span class="label @TrangThaiTinTuyenDung.ToLabelCss(Model.TrangThaiTin)">@TrangThaiTinTuyenDung.ToDisplayText(Model.TrangThaiTin)</span></dd>
+                    <dt>Hồ sơ ứng tuyển</dt>
+                    <dd>@(Model.DonUngTuyens != null ? Model.DonUngTuyens.Count : 0) hồ sơ</dd>
+                </dl>
+            </div>
+            <div class="box-footer">
+                <a href="@Url.Action("Index", "TinTuyenDung")" class="btn btn-default">Quay lại</a>
+                <a href="@Url.Action("Index", "HoSoUngTuyen", new { tinTuyenDungId = Model.TinTuyenDungId })" class="btn btn-info">Xem hồ sơ ứng tuyển</a>
+                @if (TrangThaiTinTuyenDung.CoTheSuaBoiEmployer(Model.TrangThaiTin))
+                {
+                    <a href="@Url.Action("Edit", "TinTuyenDung", new { id = Model.TinTuyenDungId })" class="btn btn-warning">Sửa tin</a>
+                    using (Html.BeginForm("GuiDuyet", "TinTuyenDung", FormMethod.Post, new { style = "display:inline-block" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.TinTuyenDungId" />
+                        <button type="submit" class="btn btn-success">Gửi duyệt</button>
+                    }
+                }
+                @if (TrangThaiTinTuyenDung.CoTheDong(Model.TrangThaiTin))
+                {
+                    using (Html.BeginForm("DongTin", "TinTuyenDung", FormMethod.Post, new { style = "display:inline-block" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.TinTuyenDungId" />
+                        <button type="submit" class="btn btn-primary">Đóng tin</button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">Nhật ký duyệt tin</h3>
+            </div>
+            <div class="box-body">
+                @if (Model.NhatKyDuyetTins != null && Model.NhatKyDuyetTins.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var log in Model.NhatKyDuyetTins.OrderByDescending(x => x.ThoiGianXuLy))
+                        {
+                            <li style="margin-bottom: 12px;">
+                                <strong>@HanhDongDuyetTin.ToDisplayText(log.HanhDong)</strong><br />
+                                <small>@log.ThoiGianXuLy.ToString("dd/MM/yyyy HH:mm") - @(log.ApplicationUser != null ? log.ApplicationUser.Email : "Hệ thống")</small>
+                                @if (!string.IsNullOrWhiteSpace(log.LyDoTuChoi))
+                                {
+                                    <div style="white-space: pre-line; margin-top: 4px;">@log.LyDoTuChoi</div>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có nhật ký xử lý.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

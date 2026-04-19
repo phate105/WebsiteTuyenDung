@@ -1,0 +1,43 @@
+﻿@{
+    ViewBag.Title = "Tìm Kiếm Việc Làm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="section-gap">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="menu-content pb-60 col-lg-10">
+                <div class="title text-center">
+                    <h1 class="mb-10">Tìm Kiếm Việc Làm</h1>
+                    <p>Tìm kiếm công việc phù hợp với bạn</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <form method="get" action="@Url.Action("Search", "Job")" class="serach-form-area">
+                    <div class="row justify-content-center form-wrap">
+                        <div class="col-lg-5 form-cols">
+                            <input type="text" name="keyword" class="form-control"
+                                   value="@ViewBag.Keyword" placeholder="Tên công việc, kỹ năng..." />
+                        </div>
+                        <div class="col-lg-4 form-cols">
+                            <input type="text" name="location" class="form-control"
+                                   value="@ViewBag.Location" placeholder="Địa điểm làm việc..." />
+                        </div>
+                        <div class="col-lg-2 form-cols">
+                            <button type="submit" class="btn btn-info" style="width:100%;">
+                                <span class="lnr lnr-magnifier"></span> Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row mt-30">
+            <div class="col-lg-12 text-center">
+                <p class="text-muted">Nhập từ khóa để tìm kiếm việc làm phù hợp</p>
+            </div>
+        </div>
+    </div>
+</section>

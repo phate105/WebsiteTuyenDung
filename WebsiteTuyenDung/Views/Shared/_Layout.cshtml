@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -40,8 +40,26 @@
                                 <li><a href="@Url.Action("Search", "Job")">Search</a></li>
                             </ul>
                         </li>
-                        <li><a class="ticker-btn" href="@Url.Action("Register", "Account")">Signup</a></li>
-                        <li><a class="ticker-btn" href="@Url.Action("Login", "Account")">Login</a></li>
+                        @if (Request.IsAuthenticated)
+                        {
+                            <li class="menu-has-children">
+                                <a href="#">@User.Identity.Name</a>
+                                <ul>
+                                    <li>
+                                        @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" style="background:none;border:none;cursor:pointer;padding:10px 15px;width:100%;text-align:left;">Đăng xuất</button>
+                                        }
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li><a class="ticker-btn" href="@Url.Action("Register", "Account")">Signup</a></li>
+                            <li><a class="ticker-btn" href="@Url.Action("Login", "Account")">Login</a></li>
+                        }
                     </ul>
                 </nav>
             </div>

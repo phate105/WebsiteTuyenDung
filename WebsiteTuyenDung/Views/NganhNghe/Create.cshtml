@@ -1,0 +1,33 @@
+﻿@model WebsiteTuyenDung.Models.Entities.NganhNghe
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Thêm ngành nghề";
+    ViewBag.PageTitle = "Thêm ngành nghề";
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Thêm ngành nghề</h3>
+    </div>
+
+    @using (Html.BeginForm("Create", "NganhNghe", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="box-body">
+            <div class="form-group">
+                <label>Tên ngành nghề</label>
+                @Html.TextBoxFor(m => m.TenNganhNghe, new { @class = "form-control", placeholder = "Nhập tên ngành nghề" })
+                @Html.ValidationMessageFor(m => m.TenNganhNghe, "", new { @class = "text-danger" })
+            </div>
+            <div class="checkbox">
+                <label>@Html.CheckBoxFor(m => m.TrangThai) Đang sử dụng</label>
+            </div>
+        </div>
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a href="@Url.Action("Index", "NganhNghe")" class="btn btn-default">Quay lại</a>
+        </div>
+    }
+</div>

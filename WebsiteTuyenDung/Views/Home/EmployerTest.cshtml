@@ -1,0 +1,103 @@
+﻿@model WebsiteTuyenDung.Models.ViewModels.EmployerDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Tổng quan nhà tuyển dụng";
+    ViewBag.PageTitle = "Tổng quan nhà tuyển dụng";
+    ViewBag.PageDescription = "Quản lý hồ sơ công ty, tin tuyển dụng và hồ sơ ứng tuyển trong một nơi.";
+}
+
+@if (!Model.HasCompanyProfile)
+{
+    <div class="callout callout-warning">
+        <h4>Bạn chưa có hồ sơ công ty</h4>
+        <p>Hãy tạo hồ sơ công ty trước khi đăng tin tuyển dụng và xử lý hồ sơ ứng tuyển.</p>
+        <a href="@Url.Action("Create", "HoSoCongTy")" class="btn btn-warning btn-sm">Tạo hồ sơ công ty</a>
+    </div>
+}
+else
+{
+    <div class="callout callout-info">
+        <h4>Doanh nghiệp đang quản lý</h4>
+        <p>Bạn đang quản lý doanh nghiệp <strong>@Model.CompanyName</strong>.</p>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>@Model.SoTinNhap</h3>
+                <p>Tin đang nháp</p>
+            </div>
+            <div class="icon"><i class="fa fa-pencil"></i></div>
+            <a href="@Url.Action("Index", "TinTuyenDung")" class="small-box-footer">Xem danh sách <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-yellow">
+            <div class="inner">
+                <h3>@Model.SoTinChoDuyet</h3>
+                <p>Tin chờ duyệt</p>
+            </div>
+            <div class="icon"><i class="fa fa-clock-o"></i></div>
+            <a href="@Url.Action("Index", "TinTuyenDung")" class="small-box-footer">Theo dõi trạng thái <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-green">
+            <div class="inner">
+                <h3>@Model.SoTinDaDuyet</h3>
+                <p>Tin đã duyệt</p>
+            </div>
+            <div class="icon"><i class="fa fa-check"></i></div>
+            <a href="@Url.Action("Index", "TinTuyenDung")" class="small-box-footer">Quản lý tin <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="small-box bg-red">
+            <div class="inner">
+                <h3>@Model.SoTinBiTuChoi</h3>
+                <p>Tin bị từ chối</p>
+            </div>
+            <div class="icon"><i class="fa fa-times"></i></div>
+            <a href="@Url.Action("Index", "TinTuyenDung")" class="small-box-footer">Sửa và gửi lại <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="small-box bg-purple">
+            <div class="inner">
+                <h3>@Model.SoHoSoChoXuLy</h3>
+                <p>Hồ sơ đang chờ xử lý</p>
+            </div>
+            <div class="icon"><i class="fa fa-file-text-o"></i></div>
+            <a href="@Url.Action("Index", "HoSoUngTuyen")" class="small-box-footer">Xử lý hồ sơ ứng tuyển <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="small-box bg-teal">
+            <div class="inner">
+                <h3>@Model.TongHoSoUngTuyen</h3>
+                <p>Tổng hồ sơ ứng tuyển</p>
+            </div>
+            <div class="icon"><i class="fa fa-users"></i></div>
+            <a href="@Url.Action("Index", "HoSoUngTuyen")" class="small-box-footer">Xem tất cả hồ sơ <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Bắt đầu nhanh</h3>
+    </div>
+    <div class="box-body">
+        <ol style="padding-left: 18px; margin-bottom: 0;">
+            <li>Cập nhật hồ sơ công ty đầy đủ tên, logo, website và thông tin liên hệ.</li>
+            <li>Tạo tin tuyển dụng mới, bổ sung mô tả công việc, yêu cầu và quyền lợi.</li>
+            <li>Gửi duyệt tin khi hoàn tất, sau đó theo dõi hồ sơ ứng tuyển và cập nhật trạng thái xử lý cho ứng viên.</li>
+        </ol>
+    </div>
+</div>

@@ -1,0 +1,125 @@
+@model WebsiteTuyenDung.Models.ViewModels.LoginViewModel
+@{
+    ViewBag.Title = "Đăng nhập";
+    ViewBag.AuthBodyClass = "hold-transition login-page";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    var demoAccounts = ViewBag.DemoAccounts as WebsiteTuyenDung.Models.ViewModels.DemoAccountInfo[] ?? new WebsiteTuyenDung.Models.ViewModels.DemoAccountInfo[0];
+}
+
+<div class="login-box">
+    <div class="login-logo">
+        <a href="@Url.Action("Index", "Home")"><b>Viet</b>Job</a>
+    </div>
+
+    <div class="login-box-body auth-box-body">
+        <p class="login-box-msg">Đăng nhập để vào hệ thống</p>
+
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger auth-alert" })
+
+        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group has-feedback">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Email", autocomplete = "username" })
+                <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger field-validation-error" })
+            </div>
+
+            <div class="form-group has-feedback password-field">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Mật khẩu", autocomplete = "current-password" })
+                <button type="button"
+                        class="password-toggle js-hold-password"
+                        data-target="Password"
+                        aria-label="Giữ để hiện mật khẩu">
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                </button>
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger field-validation-error" })
+            </div>
+
+            <div class="checkbox remember-row">
+                <label>
+                    @Html.CheckBoxFor(m => m.RememberMe) Ghi nhớ đăng nhập
+                </label>
+            </div>
+
+            <div class="auth-submit">
+                <button type="submit" class="btn btn-primary btn-block btn-flat">Đăng nhập</button>
+            </div>
+        }
+
+        <div class="auth-helper">
+            Chưa có tài khoản?
+            <a href="@Url.Action("Register", "Account")">Đăng ký ngay</a>
+        </div>
+
+        <hr class="auth-divider" />
+
+        <p class="login-box-msg" style="margin-bottom: 12px;">Tài khoản demo</p>
+        <div class="demo-account-list">
+            @foreach (var account in demoAccounts)
+            {
+                <button type="button"
+                        class="btn btn-default demo-login-btn js-demo-login"
+                        data-email="@account.Email"
+                        data-password="@account.Password">
+                    <strong>@account.RoleLabel</strong>
+                    <span>@account.Email - @account.Password</span>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            var emailInput = document.getElementById("Email");
+            var passwordInput = document.getElementById("Password");
+
+            document.querySelectorAll(".js-demo-login").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    if (emailInput) {
+                        emailInput.value = button.getAttribute("data-email") || "";
+                    }
+
+                    if (passwordInput) {
+                        passwordInput.value = button.getAttribute("data-password") || "";
+                    }
+
+                    if (emailInput) {
+                        emailInput.focus();
+                    }
+                });
+            });
+
+            function showPassword(button) {
+                if (!passwordInput) {
+                    return;
+                }
+
+                passwordInput.type = "text";
+                button.innerHTML = '<span class="glyphicon glyphicon-eye-close"></span>';
+            }
+
+            function hidePassword(button) {
+                if (!passwordInput) {
+                    return;
+                }
+
+                passwordInput.type = "password";
+                button.innerHTML = '<span class="glyphicon glyphicon-eye-open"></span>';
+            }
+
+            document.querySelectorAll(".js-hold-password").forEach(function (button) {
+                button.addEventListener("mousedown", function () { showPassword(button); });
+                button.addEventListener("mouseup", function () { hidePassword(button); });
+                button.addEventListener("mouseleave", function () { hidePassword(button); });
+                button.addEventListener("touchstart", function () { showPassword(button); }, { passive: true });
+                button.addEventListener("touchend", function () { hidePassword(button); });
+                button.addEventListener("touchcancel", function () { hidePassword(button); });
+                button.addEventListener("blur", function () { hidePassword(button); });
+            });
+        })();
+    </script>
+}
