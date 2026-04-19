@@ -11,11 +11,11 @@ namespace WebsiteTuyenDung.Models.Entities
 
         [Required]
         [StringLength(100)]
+        [Index("IX_NganhNghe_TenNganhNghe", IsUnique = true)]
         public string TenNganhNghe { get; set; }
 
         public bool TrangThai { get; set; }
 
-        // Navigation
         public virtual ICollection<TinTuyenDung> TinTuyenDungs { get; set; }
 
         public NganhNghe()

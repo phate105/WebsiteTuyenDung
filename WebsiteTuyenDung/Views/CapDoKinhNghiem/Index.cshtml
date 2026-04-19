@@ -1,0 +1,67 @@
+﻿@model IEnumerable<WebsiteTuyenDung.Models.Entities.CapDoKinhNghiem>
+@using System.Linq
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Cấp độ kinh nghiệm";
+    ViewBag.PageTitle = "Quản lý cấp độ kinh nghiệm";
+    ViewBag.PageDescription = "Quản lý danh mục cấp độ kinh nghiệm dùng chung cho tin tuyển dụng.";
+}
+
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Danh sách cấp độ kinh nghiệm</h3>
+        <div class="box-tools pull-right">
+            <a href="@Url.Action("Create", "CapDoKinhNghiem")" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Thêm mới</a>
+        </div>
+    </div>
+    <div class="box-body table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Tên cấp độ kinh nghiệm</th>
+                    <th>Trạng thái</th>
+                    <th style="width:160px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.CapDoKinhNghiemId</td>
+                            <td>@item.TenCapDoKinhNghiem</td>
+                            <td>
+                                @if (item.TrangThai)
+                                {
+                                    <span class="label label-success">Đang sử dụng</span>
+                                }
+                                else
+                                {
+                                    <span class="label label-default">Ngừng sử dụng</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Edit", "CapDoKinhNghiem", new { id = item.CapDoKinhNghiemId })" class="btn btn-warning btn-xs">Sửa</a>
+                                @using (Html.BeginForm("Delete", "CapDoKinhNghiem", FormMethod.Post, new { style = "display:inline-block" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.CapDoKinhNghiemId" />
+                                    <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('Bạn có chắc muốn xóa hoặc ngừng sử dụng cấp độ này?');">Xóa</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center">Chưa có dữ liệu</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

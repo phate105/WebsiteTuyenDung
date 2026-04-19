@@ -1,0 +1,21 @@
+﻿@model WebsiteTuyenDung.Models.Entities.TinTuyenDung
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Tạo tin tuyển dụng";
+    ViewBag.PageTitle = "Tạo tin tuyển dụng";
+    ViewBag.PageDescription = "Tin mới sẽ được lưu ở trạng thái nháp trước khi gửi duyệt.";
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Thông tin tin tuyển dụng</h3>
+    </div>
+
+    @using (Html.BeginForm("Create", "TinTuyenDung", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.Partial("_Form", Model)
+    }
+</div>

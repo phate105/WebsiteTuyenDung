@@ -1,0 +1,159 @@
+@{
+    var pageTitle = string.IsNullOrWhiteSpace(ViewBag.Title as string) ? "Tài khoản" : (string)ViewBag.Title;
+    var bodyClass = string.IsNullOrWhiteSpace(ViewBag.AuthBodyClass as string)
+        ? "hold-transition login-page"
+        : (string)ViewBag.AuthBodyClass;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>@pageTitle - WebsiteTuyenDung</title>
+    <link rel="stylesheet" href="~/Content/AdminLTE/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/AdminLTE/dist/css/AdminLTE.min.css" />
+    <style>
+        body.login-page,
+        body.register-page {
+            background: #d8dde6;
+        }
+
+        .login-logo a,
+        .register-logo a {
+            color: #2b2f33;
+        }
+
+        .auth-box-body {
+            border-top: 3px solid #3c8dbc;
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .register-box .auth-box-body {
+            border-top-color: #00a65a;
+        }
+
+        .validation-summary-errors,
+        .auth-alert {
+            margin-bottom: 15px;
+        }
+
+        .field-validation-error {
+            display: block;
+            margin-top: 4px;
+            font-size: 12px;
+        }
+
+        .auth-helper {
+            margin-top: 15px;
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .auth-divider {
+            margin: 18px 0 14px;
+        }
+
+        .auth-note {
+            margin-top: 15px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .remember-row label {
+            cursor: pointer;
+            font-weight: 400;
+            user-select: none;
+        }
+
+        .remember-row input[type="checkbox"] {
+            margin-right: 6px;
+        }
+
+        .demo-account-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .demo-login-btn {
+            width: 100%;
+            text-align: left;
+            white-space: normal;
+            border-radius: 4px;
+            padding: 10px 12px;
+        }
+
+        .demo-login-btn strong {
+            display: block;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .demo-login-btn span {
+            display: block;
+            margin-top: 4px;
+            color: #777;
+            font-size: 12px;
+        }
+
+        .demo-login-btn:hover,
+        .demo-login-btn:focus {
+            border-color: #3c8dbc;
+            color: inherit;
+            background: #f7fbfe;
+        }
+
+        .auth-submit {
+            margin-top: 6px;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-field .form-control {
+            padding-right: 42px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 3;
+            width: 34px;
+            height: 34px;
+            border: 0;
+            padding: 0;
+            background: transparent;
+            color: #777;
+            outline: 0;
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus {
+            color: #3c8dbc;
+        }
+
+        @@media (max-width: 480px) {
+            .login-box,
+            .register-box {
+                width: 90%;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="@bodyClass">
+    @RenderBody()
+
+    <script src="~/Scripts/jquery-3.7.0.min.js"></script>
+    <script src="~/Content/AdminLTE/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

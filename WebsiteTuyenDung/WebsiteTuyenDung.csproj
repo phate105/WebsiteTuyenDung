@@ -52,7 +52,34 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.4\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.EntityFramework, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.EntityFramework.2.2.4\lib\net45\Microsoft.AspNet.Identity.EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.4\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Owin, Version=4.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.4.2.3\lib\net45\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=4.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.4.2.3\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.3.0.1\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.3.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.3.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -127,41 +154,120 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\CapDoKinhNghiemController.cs" />
+    <Compile Include="Controllers\DiaDiemController.cs" />
+    <Compile Include="Controllers\HoSoCongTyController.cs" />
+    <Compile Include="Controllers\HoSoUngTuyenController.cs" />
+    <Compile Include="Controllers\KiemDuyetTinTuyenDungController.cs" />
+    <Compile Include="Controllers\LoaiHinhLamViecController.cs" />
+    <Compile Include="Controllers\NganhNgheController.cs" />
+    <Compile Include="Controllers\TaiKhoanController.cs" />
+    <Compile Include="Controllers\ThongKeController.cs" />
+    <Compile Include="Controllers\TinTuyenDungController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202604120906204_InitDb.cs" />
-    <Compile Include="Migrations\202604120906204_InitDb.Designer.cs">
-      <DependentUpon>202604120906204_InitDb.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202604120912483_AddMoreTables.cs" />
-    <Compile Include="Migrations\202604120912483_AddMoreTables.Designer.cs">
-      <DependentUpon>202604120912483_AddMoreTables.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202604120924422_UpdateNganhNgheAndDiaDiem.cs" />
-    <Compile Include="Migrations\202604120924422_UpdateNganhNgheAndDiaDiem.Designer.cs">
-      <DependentUpon>202604120924422_UpdateNganhNgheAndDiaDiem.cs</DependentUpon>
+    <Compile Include="Migrations\202604171348271_InitIdentityCore.cs" />
+    <Compile Include="Migrations\202604171348271_InitIdentityCore.Designer.cs">
+      <DependentUpon>202604171348271_InitIdentityCore.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
+    <Compile Include="Models\ApplicationUser.cs" />
+    <Compile Include="Models\Constants\ApplicationRoles.cs" />
+    <Compile Include="Models\Constants\HanhDongDuyetTin.cs" />
+    <Compile Include="Models\Constants\TrangThaiDonUngTuyen.cs" />
+    <Compile Include="Models\Constants\TrangThaiTinTuyenDung.cs" />
     <Compile Include="Models\Entities\CapDoKinhNghiem.cs" />
     <Compile Include="Models\Entities\LichSuTrangThaiDon.cs" />
     <Compile Include="Models\Entities\NhatKyDuyetTin.cs" />
     <Compile Include="Models\Entities\LoaiHinhLamViec.cs" />
     <Compile Include="Models\Entities\DiaDiem.cs" />
     <Compile Include="Models\Entities\NganhNghe.cs" />
-    <Compile Include="Models\Entities\VaiTro.cs" />
     <Compile Include="Models\Entities\CVUngVien.cs" />
     <Compile Include="Models\Entities\DonUngTuyen.cs" />
     <Compile Include="Models\Entities\TinTuyenDung.cs" />
     <Compile Include="Models\Entities\HoSoCaNhan.cs" />
     <Compile Include="Models\Entities\HoSoCongTy.cs" />
-    <Compile Include="Models\Entities\NguoiDung.cs" />
+    <Compile Include="Models\ViewModels\AccountAuthViewModels.cs" />
+    <Compile Include="Models\ViewModels\PortalViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\AdminLTE\.idea\encodings.xml" />
+    <Content Include="Content\AdminLTE\.idea\inspectionProfiles\profiles_settings.xml" />
+    <Content Include="Content\AdminLTE\.idea\inspectionProfiles\Project_Default.xml" />
+    <Content Include="Content\AdminLTE\.idea\misc.xml" />
+    <Content Include="Content\AdminLTE\.idea\modules.xml" />
+    <Content Include="Content\AdminLTE\.idea\scopes\scope_settings.xml" />
+    <Content Include="Content\AdminLTE\.idea\vcs.xml" />
+    <Content Include="Content\AdminLTE\.idea\workspace.xml" />
+    <Content Include="Content\AdminLTE\bootstrap\css\bootstrap.min.css" />
+    <Content Include="Content\AdminLTE\bootstrap\css\fileinput.min.css" />
+    <Content Include="Content\AdminLTE\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\AdminLTE\bootstrap\js\bootstrap.min.js" />
+    <Content Include="Content\AdminLTE\bootstrap\js\fileinput.min.js" />
+    <Content Include="Content\AdminLTE\dist\css\AdminLTE.min.css" />
+    <Content Include="Content\AdminLTE\dist\css\skins\_all-skins.min.css" />
+    <Content Include="Content\AdminLTE\dist\img\avatar.png" />
+    <Content Include="Content\AdminLTE\dist\img\avatar04.png" />
+    <Content Include="Content\AdminLTE\dist\img\avatar2.png" />
+    <Content Include="Content\AdminLTE\dist\img\avatar3.png" />
+    <Content Include="Content\AdminLTE\dist\img\avatar5.png" />
+    <Content Include="Content\AdminLTE\dist\img\boxed-bg.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\boxed-bg.png" />
+    <Content Include="Content\AdminLTE\dist\img\credit\american-express.png" />
+    <Content Include="Content\AdminLTE\dist\img\credit\cirrus.png" />
+    <Content Include="Content\AdminLTE\dist\img\credit\mastercard.png" />
+    <Content Include="Content\AdminLTE\dist\img\credit\mestro.png" />
+    <Content Include="Content\AdminLTE\dist\img\credit\paypal.png" />
+    <Content Include="Content\AdminLTE\dist\img\credit\paypal2.png" />
+    <Content Include="Content\AdminLTE\dist\img\credit\visa.png" />
+    <Content Include="Content\AdminLTE\dist\img\default-50x50.gif" />
+    <Content Include="Content\AdminLTE\dist\img\icons.png" />
+    <Content Include="Content\AdminLTE\dist\img\photo1.png" />
+    <Content Include="Content\AdminLTE\dist\img\photo2.png" />
+    <Content Include="Content\AdminLTE\dist\img\photo3.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\photo4.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user1-128x128.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user2-160x160.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user3-128x128.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user4-128x128.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user5-128x128.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user6-128x128.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user7-128x128.jpg" />
+    <Content Include="Content\AdminLTE\dist\img\user8-128x128.jpg" />
+    <Content Include="Content\AdminLTE\dist\js\app.min.js" />
+    <Content Include="Content\AdminLTE\dist\js\demo.js" />
+    <Content Include="Content\AdminLTE\dist\js\pages\dashboard2.js" />
+    <Content Include="Content\AdminLTE\favicon.ico" />
+    <Content Include="Content\AdminLTE\login.html" />
+    <Content Include="Content\AdminLTE\plugins\bootstrap-wysihtml5\bootstrap3-wysihtml5.all.min.js" />
+    <Content Include="Content\AdminLTE\plugins\bootstrap-wysihtml5\bootstrap3-wysihtml5.min.css" />
+    <Content Include="Content\AdminLTE\plugins\datatables\dataTables.alphabetSearch.js" />
+    <Content Include="Content\AdminLTE\plugins\datatables\dataTables.bootstrap.css" />
+    <Content Include="Content\AdminLTE\plugins\datatables\dataTables.bootstrap.min.js" />
+    <Content Include="Content\AdminLTE\plugins\datatables\jquery.dataTables.min.js" />
+    <Content Include="Content\AdminLTE\plugins\fastclick\fastclick.min.js" />
+    <Content Include="Content\AdminLTE\plugins\font-awesome\css\font-awesome.min.css" />
+    <Content Include="Content\AdminLTE\plugins\font-awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="Content\AdminLTE\plugins\iCheck\all.css" />
+    <Content Include="Content\AdminLTE\plugins\iCheck\icheck.min.js" />
+    <Content Include="Content\AdminLTE\plugins\iCheck\minimal\blue%402x.png" />
+    <Content Include="Content\AdminLTE\plugins\iCheck\minimal\blue.css" />
+    <Content Include="Content\AdminLTE\plugins\iCheck\minimal\blue.png" />
+    <Content Include="Content\AdminLTE\plugins\iCheck\minimal\_all.css" />
+    <Content Include="Content\AdminLTE\plugins\ionicons\css\ionicons.min.css" />
+    <Content Include="Content\AdminLTE\plugins\ionicons\fonts\ionicons.svg" />
+    <Content Include="Content\AdminLTE\plugins\jQuery\jQuery-2.1.4.min.js" />
+    <Content Include="Content\AdminLTE\plugins\select2\select2.full.min.js" />
+    <Content Include="Content\AdminLTE\plugins\select2\select2.min.css" />
+    <Content Include="Content\AdminLTE\plugins\slimScroll\jquery.slimscroll.min.js" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
@@ -304,6 +410,20 @@
     <Content Include="Content\fonts\Linearicons-Free.ttf" />
     <Content Include="Content\fonts\Linearicons-Free.woff" />
     <Content Include="Content\fonts\Linearicons-Free.woff2" />
+    <Content Include="Content\AdminLTE\.idea\.name" />
+    <Content Include="Content\AdminLTE\.idea\AdminLTE.iml" />
+    <Content Include="Content\AdminLTE\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\AdminLTE\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Content\AdminLTE\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Content\AdminLTE\bootstrap\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Content\AdminLTE\plugins\font-awesome\fonts\fontawesome-webfont.eot" />
+    <Content Include="Content\AdminLTE\plugins\font-awesome\fonts\fontawesome-webfont.ttf" />
+    <Content Include="Content\AdminLTE\plugins\font-awesome\fonts\fontawesome-webfont.woff" />
+    <Content Include="Content\AdminLTE\plugins\font-awesome\fonts\fontawesome-webfont.woff2" />
+    <Content Include="Content\AdminLTE\plugins\font-awesome\fonts\FontAwesome.otf" />
+    <Content Include="Content\AdminLTE\plugins\ionicons\fonts\ionicons.eot" />
+    <Content Include="Content\AdminLTE\plugins\ionicons\fonts\ionicons.ttf" />
+    <Content Include="Content\AdminLTE\plugins\ionicons\fonts\ionicons.woff" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -339,13 +459,55 @@
     </Content>
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\CapDoKinhNghiem\Create.cshtml" />
+    <Content Include="Views\CapDoKinhNghiem\Edit.cshtml" />
+    <Content Include="Views\CapDoKinhNghiem\Index.cshtml" />
+    <Content Include="Views\DiaDiem\Create.cshtml" />
+    <Content Include="Views\DiaDiem\Edit.cshtml" />
+    <Content Include="Views\DiaDiem\Index.cshtml" />
+    <Content Include="Views\HoSoCongTy\_Form.cshtml" />
+    <Content Include="Views\HoSoCongTy\Create.cshtml" />
+    <Content Include="Views\HoSoCongTy\Edit.cshtml" />
+    <Content Include="Views\HoSoCongTy\Index.cshtml" />
+    <Content Include="Views\HoSoUngTuyen\Details.cshtml" />
+    <Content Include="Views\HoSoUngTuyen\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\_AdminFooter.cshtml" />
+    <Content Include="Views\Shared\_AdminLayout.cshtml" />
+    <Content Include="Views\Shared\_AdminNavbar.cshtml" />
+    <Content Include="Views\Shared\_AdminSidebar.cshtml" />
+    <Content Include="Views\Shared\_AuthLayout.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\Home\AdminTest.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
+    <Content Include="Views\Home\EmployerTest.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Job\Index.cshtml" />
+    <Content Include="Views\Job\Search.cshtml" />
+    <Content Include="Views\KiemDuyetTinTuyenDung\Details.cshtml" />
+    <Content Include="Views\KiemDuyetTinTuyenDung\Index.cshtml" />
+    <Content Include="Views\LoaiHinhLamViec\Create.cshtml" />
+    <Content Include="Views\LoaiHinhLamViec\Edit.cshtml" />
+    <Content Include="Views\LoaiHinhLamViec\Index.cshtml" />
+    <Content Include="Views\NganhNghe\Create.cshtml" />
+    <Content Include="Views\NganhNghe\Edit.cshtml" />
+    <Content Include="Views\NganhNghe\Index.cshtml" />
+    <Content Include="Views\TaiKhoan\Index.cshtml" />
+    <Content Include="Views\ThongKe\Index.cshtml" />
+    <Content Include="Views\TinTuyenDung\_Form.cshtml" />
+    <Content Include="Views\TinTuyenDung\Create.cshtml" />
+    <Content Include="Views\TinTuyenDung\Details.cshtml" />
+    <Content Include="Views\TinTuyenDung\Edit.cshtml" />
+    <Content Include="Views\TinTuyenDung\Index.cshtml" />
     <Content Include="Web1.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202604171348271_InitIdentityCore.resx">
+      <DependentUpon>202604171348271_InitIdentityCore.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -378,17 +540,6 @@
     <Content Include="Scripts\bootstrap.bundle.js.map" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\202604120906204_InitDb.resx">
-      <DependentUpon>202604120906204_InitDb.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202604120912483_AddMoreTables.resx">
-      <DependentUpon>202604120912483_AddMoreTables.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202604120924422_UpdateNganhNgheAndDiaDiem.resx">
-      <DependentUpon>202604120924422_UpdateNganhNgheAndDiaDiem.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

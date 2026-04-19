@@ -1,0 +1,80 @@
+﻿@using System
+@using System.Linq
+@using WebsiteTuyenDung.Models.Constants
+@model IEnumerable<WebsiteTuyenDung.Models.Entities.TinTuyenDung>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.PageTitle = "Kiểm duyệt tin tuyển dụng";
+    ViewBag.Title = "Kiểm duyệt tin tuyển dụng";
+    ViewBag.PageDescription = "Xem danh sách tin chờ duyệt, đã duyệt, bị từ chối hoặc đã đóng để xử lý kịp thời.";
+    var trangThaiHienTai = ViewBag.TrangThai as string;
+}
+
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Danh sách tin tuyển dụng</h3>
+        <div class="box-tools pull-right">
+            <a href="@Url.Action("Index", new { trangThai = "" })" class="btn btn-sm @(string.IsNullOrWhiteSpace(trangThaiHienTai) ? "btn-primary" : "btn-default")">Tất cả</a>
+            <a href="@Url.Action("Index", new { trangThai = TrangThaiTinTuyenDung.ChoDuyet })" class="btn btn-sm @(trangThaiHienTai == TrangThaiTinTuyenDung.ChoDuyet ? "btn-warning" : "btn-default")">Chờ duyệt</a>
+            <a href="@Url.Action("Index", new { trangThai = TrangThaiTinTuyenDung.DaDuyet })" class="btn btn-sm @(trangThaiHienTai == TrangThaiTinTuyenDung.DaDuyet ? "btn-success" : "btn-default")">Đã duyệt</a>
+            <a href="@Url.Action("Index", new { trangThai = TrangThaiTinTuyenDung.BiTuChoi })" class="btn btn-sm @(trangThaiHienTai == TrangThaiTinTuyenDung.BiTuChoi ? "btn-danger" : "btn-default")">Bị từ chối</a>
+            <a href="@Url.Action("Index", new { trangThai = TrangThaiTinTuyenDung.DaDong })" class="btn btn-sm @(trangThaiHienTai == TrangThaiTinTuyenDung.DaDong ? "btn-primary" : "btn-default")">Đã đóng</a>
+        </div>
+    </div>
+    <div class="box-body table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Công ty</th>
+                    <th>Hạn nộp</th>
+                    <th>Ngày gửi duyệt</th>
+                    <th>Ngày tạo</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 180px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        var ngayGuiDuyet = item.NhatKyDuyetTins != null
+                            ? item.NhatKyDuyetTins.Where(x => x.HanhDong == HanhDongDuyetTin.GuiDuyet).OrderByDescending(x => x.ThoiGianXuLy).Select(x => (DateTime?)x.ThoiGianXuLy).FirstOrDefault()
+                            : null;
+                        <tr>
+                            <td>
+                                <strong>@item.TieuDe</strong><br />
+                                <small>@(item.NganhNghe != null ? item.NganhNghe.TenNganhNghe : "Chưa cập nhật") - @(item.DiaDiem != null ? item.DiaDiem.TenDiaDiem : "Chưa cập nhật")</small>
+                            </td>
+                            <td>@(item.HoSoCongTy != null ? item.HoSoCongTy.TenCongTy : "Chưa cập nhật")</td>
+                            <td>@item.HanNopHoSo.ToString("dd/MM/yyyy")</td>
+                            <td>@(ngayGuiDuyet.HasValue ? ngayGuiDuyet.Value.ToString("dd/MM/yyyy HH:mm") : "Chưa gửi duyệt")</td>
+                            <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><span class="label @TrangThaiTinTuyenDung.ToLabelCss(item.TrangThaiTin)">@TrangThaiTinTuyenDung.ToDisplayText(item.TrangThaiTin)</span></td>
+                            <td>
+                                <a href="@Url.Action("Details", new { id = item.TinTuyenDungId })" class="btn btn-info btn-xs">Chi tiết</a>
+                                @if (item.TrangThaiTin == TrangThaiTinTuyenDung.ChoDuyet)
+                                {
+                                    using (Html.BeginForm("Duyet", "KiemDuyetTinTuyenDung", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.TinTuyenDungId" />
+                                        <button type="submit" class="btn btn-success btn-xs">Duyệt</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Không có tin tuyển dụng phù hợp với bộ lọc hiện tại.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

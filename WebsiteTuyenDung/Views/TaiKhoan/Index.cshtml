@@ -1,0 +1,173 @@
+﻿@using System.Linq
+@using WebsiteTuyenDung.Models.Constants
+@model WebsiteTuyenDung.Models.ViewModels.AdminTaiKhoanIndexViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Quản lý tài khoản";
+    ViewBag.PageTitle = "Quản lý tài khoản";
+    ViewBag.PageDescription = "Danh sách tài khoản, vai trò và trạng thái khóa/mở khóa bằng Identity lockout.";
+}
+
+<div class="row">
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-blue"><i class="fa fa-users"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Tổng tài khoản</span>
+                <span class="info-box-number">@Model.TongTaiKhoan</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-green"><i class="fa fa-unlock"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Đang hoạt động</span>
+                <span class="info-box-number">@Model.TongDangHoatDong</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-red"><i class="fa fa-lock"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Đang bị khóa</span>
+                <span class="info-box-number">@Model.TongBiKhoa</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Bộ lọc tài khoản</h3>
+    </div>
+    <div class="box-body">
+        @using (Html.BeginForm("Index", "TaiKhoan", FormMethod.Get, new { @class = "row" }))
+        {
+            <div class="col-md-5 form-group">
+                <label>Vai trò</label>
+                <select name="vaiTro" class="form-control">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="@ApplicationRoles.Admin" @(Model.VaiTro == ApplicationRoles.Admin ? "selected" : string.Empty)>Admin</option>
+                    <option value="@ApplicationRoles.NhaTuyenDung" @(Model.VaiTro == ApplicationRoles.NhaTuyenDung ? "selected" : string.Empty)>Nhà tuyển dụng</option>
+                    <option value="@ApplicationRoles.UngVien" @(Model.VaiTro == ApplicationRoles.UngVien ? "selected" : string.Empty)>Ứng viên</option>
+                </select>
+            </div>
+            <div class="col-md-5 form-group">
+                <label>Trạng thái</label>
+                <select name="trangThai" class="form-control">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="DangHoatDong" @(Model.TrangThai == "DangHoatDong" ? "selected" : string.Empty)>Đang hoạt động</option>
+                    <option value="DaKhoa" @(Model.TrangThai == "DaKhoa" ? "selected" : string.Empty)>Đã khóa</option>
+                </select>
+            </div>
+            <div class="col-md-2 form-group" style="padding-top: 24px;">
+                <button type="submit" class="btn btn-primary btn-block">Lọc</button>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Danh sách tài khoản</h3>
+    </div>
+    <div class="box-body table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Email / UserName</th>
+                    <th>Vai trò</th>
+                    <th>Thông tin liên kết</th>
+                    <th>Hoạt động</th>
+                    <th>Trạng thái</th>
+                    <th style="width: 150px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.TaiKhoans != null && Model.TaiKhoans.Any())
+                {
+                    foreach (var item in Model.TaiKhoans)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.Email</strong>
+                                <div><small>@item.UserName</small></div>
+                                @if (item.LaTaiKhoanHienTai)
+                                {
+                                    <div><small class="text-muted">Tài khoản đang đăng nhập</small></div>
+                                }
+                            </td>
+                            <td>@item.VaiTro</td>
+                            <td>@item.ThongTinLienKet</td>
+                            <td>
+                                @if (item.VaiTro == ApplicationRoles.NhaTuyenDung)
+                                {
+                                    <span>@item.SoTinTuyenDung tin tuyển dụng</span>
+                                }
+                                else if (item.VaiTro == ApplicationRoles.UngVien)
+                                {
+                                    <span>@item.SoDonUngTuyen đơn ứng tuyển</span>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.BiKhoa)
+                                {
+                                    <span class="label label-danger">Đã khóa</span>
+                                    if (item.KhoaDenLuc.HasValue)
+                                    {
+                                        <div><small>Đến: @item.KhoaDenLuc.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small></div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="label label-success">Hoạt động</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.BiKhoa)
+                                {
+                                    using (Html.BeginForm("MoKhoa", "TaiKhoan", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.UserId" />
+                                        <input type="hidden" name="vaiTro" value="@Model.VaiTro" />
+                                        <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                        <button type="submit" class="btn btn-success btn-xs">Mở khóa</button>
+                                    }
+                                }
+                                else if (item.LaTaiKhoanHienTai)
+                                {
+                                    <span class="text-muted">Không thể tự khóa</span>
+                                }
+                                else
+                                {
+                                    using (Html.BeginForm("Khoa", "TaiKhoan", FormMethod.Post, new { style = "display:inline-block;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.UserId" />
+                                        <input type="hidden" name="vaiTro" value="@Model.VaiTro" />
+                                        <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                        <button type="submit" class="btn btn-danger btn-xs">Khóa</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">Không có tài khoản phù hợp với bộ lọc hiện tại.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,95 @@
+﻿@model WebsiteTuyenDung.Models.Entities.TinTuyenDung
+@using WebsiteTuyenDung.Models.Constants
+
+<div class="box-body">
+    <div class="form-group">
+        <label>Trạng thái hiện tại</label>
+        <div>
+            <span class="label @TrangThaiTinTuyenDung.ToLabelCss(Model.TrangThaiTin)">
+                @TrangThaiTinTuyenDung.ToDisplayText(Model.TrangThaiTin)
+            </span>
+        </div>
+        <p class="help-block">Employer chỉ được sửa khi tin đang ở trạng thái Nhập hoặc Bị từ chối. Tin mới tạo mặc định ở trạng thái Nhập.</p>
+    </div>
+
+    <div class="form-group">
+        <label>Tiêu đề</label>
+        @Html.TextBoxFor(m => m.TieuDe, new { @class = "form-control", placeholder = "Nhập tiêu đề tin tuyển dụng" })
+        @Html.ValidationMessageFor(m => m.TieuDe, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>Ngành nghề</label>
+        @Html.DropDownListFor(m => m.NganhNgheId, ViewBag.NganhNgheId as SelectList, "-- Chọn ngành nghề --", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.NganhNgheId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>Địa điểm</label>
+        @Html.DropDownListFor(m => m.DiaDiemId, ViewBag.DiaDiemId as SelectList, "-- Chọn địa điểm --", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.DiaDiemId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>Loại hình làm việc</label>
+        @Html.DropDownListFor(m => m.LoaiHinhLamViecId, ViewBag.LoaiHinhLamViecId as SelectList, "-- Chọn loại hình --", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.LoaiHinhLamViecId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>Cấp độ kinh nghiệm</label>
+        @Html.DropDownListFor(m => m.CapDoKinhNghiemId, ViewBag.CapDoKinhNghiemId as SelectList, "-- Chọn cấp độ --", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.CapDoKinhNghiemId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>Mô tả công việc</label>
+        @Html.TextAreaFor(m => m.MoTaCongViec, new { @class = "form-control", rows = 5, placeholder = "Nhập mô tả công việc" })
+        @Html.ValidationMessageFor(m => m.MoTaCongViec, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>Yêu cầu</label>
+        @Html.TextAreaFor(m => m.YeuCau, new { @class = "form-control", rows = 4, placeholder = "Nhập yêu cầu công việc" })
+    </div>
+
+    <div class="form-group">
+        <label>Quyền lợi</label>
+        @Html.TextAreaFor(m => m.QuyenLoi, new { @class = "form-control", rows = 4, placeholder = "Nhập quyền lợi" })
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Số lượng tuyển</label>
+                @Html.TextBoxFor(m => m.SoLuongTuyen, new { @class = "form-control", type = "number", min = "1" })
+                @Html.ValidationMessageFor(m => m.SoLuongTuyen, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Lương tối thiểu</label>
+                @Html.TextBoxFor(m => m.LuongToiThieu, new { @class = "form-control", type = "number", step = "1000" })
+                @Html.ValidationMessageFor(m => m.LuongToiThieu, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Lương tối đa</label>
+                @Html.TextBoxFor(m => m.LuongToiDa, new { @class = "form-control", type = "number", step = "1000" })
+                @Html.ValidationMessageFor(m => m.LuongToiDa, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Hạn nộp hồ sơ</label>
+        @Html.TextBoxFor(m => m.HanNopHoSo, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+        @Html.ValidationMessageFor(m => m.HanNopHoSo, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="box-footer">
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a href="@Url.Action("Index", "TinTuyenDung")" class="btn btn-default">Quay lại</a>
+</div>

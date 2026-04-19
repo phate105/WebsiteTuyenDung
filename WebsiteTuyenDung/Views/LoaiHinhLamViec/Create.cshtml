@@ -1,0 +1,33 @@
+﻿@model WebsiteTuyenDung.Models.Entities.LoaiHinhLamViec
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Thêm loại hình làm việc";
+    ViewBag.PageTitle = "Thêm loại hình làm việc";
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Thêm loại hình làm việc</h3>
+    </div>
+
+    @using (Html.BeginForm("Create", "LoaiHinhLamViec", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="box-body">
+            <div class="form-group">
+                <label>Tên loại hình làm việc</label>
+                @Html.TextBoxFor(m => m.TenLoaiHinhLamViec, new { @class = "form-control", placeholder = "Nhập tên loại hình làm việc" })
+                @Html.ValidationMessageFor(m => m.TenLoaiHinhLamViec, "", new { @class = "text-danger" })
+            </div>
+            <div class="checkbox">
+                <label>@Html.CheckBoxFor(m => m.TrangThai) Đang sử dụng</label>
+            </div>
+        </div>
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a href="@Url.Action("Index", "LoaiHinhLamViec")" class="btn btn-default">Quay lại</a>
+        </div>
+    }
+</div>

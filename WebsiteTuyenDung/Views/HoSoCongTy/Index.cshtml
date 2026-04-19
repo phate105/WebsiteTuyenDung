@@ -1,0 +1,97 @@
+﻿@model WebsiteTuyenDung.Models.Entities.HoSoCongTy
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Hồ sơ công ty";
+    ViewBag.PageTitle = "Hồ sơ công ty";
+    ViewBag.PageDescription = "Quản lý thông tin doanh nghiệp của tài khoản đang đăng nhập.";
+    var logoUrl = Model == null || string.IsNullOrWhiteSpace(Model.Logo)
+        ? null
+        : (Model.Logo.StartsWith("http", System.StringComparison.OrdinalIgnoreCase) || Model.Logo.StartsWith("/")
+            ? Model.Logo
+            : Url.Content(Model.Logo));
+}
+
+@if (Model == null)
+{
+    <div class="box box-warning">
+        <div class="box-header with-border">
+            <h3 class="box-title">Chưa có hồ sơ công ty</h3>
+        </div>
+        <div class="box-body">
+            <p>Bạn chưa có hồ sơ công ty. Hãy tạo hồ sơ công ty trước khi đăng tin tuyển dụng và xử lý hồ sơ ứng tuyển.</p>
+            <a href="@Url.Action("Create", "HoSoCongTy")" class="btn btn-primary"><i class="fa fa-plus"></i> Tạo hồ sơ công ty</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Logo doanh nghiệp</h3>
+                </div>
+                <div class="box-body text-center">
+                    @if (!string.IsNullOrWhiteSpace(logoUrl))
+                    {
+                        <img src="@logoUrl" alt="@Model.TenCongTy" style="max-width: 100%; max-height: 220px; object-fit: contain; border: 1px solid #eee; padding: 10px;" />
+                    }
+                    else
+                    {
+                        <div style="padding: 40px 0; color: #999; border: 1px dashed #ddd;">Chưa có logo công ty</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Thông tin công ty</h3>
+                    <div class="box-tools pull-right">
+                        <a href="@Url.Action("Edit", "HoSoCongTy", new { id = Model.HoSoCongTyId })" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i> Chỉnh sửa</a>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Tên công ty</dt>
+                        <dd>@Model.TenCongTy</dd>
+                        <dt>Mã số thuế</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.MaSoThue) ? "Chưa cập nhật" : Model.MaSoThue)</dd>
+                        <dt>Email liên hệ</dt>
+                        <dd>
+                            @if (!string.IsNullOrWhiteSpace(Model.EmailLienHe))
+                            {
+                                <a href="mailto:@Model.EmailLienHe">@Model.EmailLienHe</a>
+                            }
+                            else
+                            {
+                                <span>Chưa cập nhật</span>
+                            }
+                        </dd>
+                        <dt>Số điện thoại</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.SoDienThoaiLienHe) ? "Chưa cập nhật" : Model.SoDienThoaiLienHe)</dd>
+                        <dt>Địa chỉ</dt>
+                        <dd>@(string.IsNullOrWhiteSpace(Model.DiaChi) ? "Chưa cập nhật" : Model.DiaChi)</dd>
+                        <dt>Website</dt>
+                        <dd>
+                            @if (!string.IsNullOrWhiteSpace(Model.Website))
+                            {
+                                <a href="@Model.Website" target="_blank" rel="noopener">@Model.Website</a>
+                            }
+                            else
+                            {
+                                <span>Chưa cập nhật</span>
+                            }
+                        </dd>
+                        <dt>Mô tả</dt>
+                        <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.MoTa) ? "Chưa cập nhật" : Model.MoTa)</dd>
+                        <dt>Ngày tạo</dt>
+                        <dd>@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</dd>
+                        <dt>Ngày cập nhật</dt>
+                        <dd>@Model.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+}

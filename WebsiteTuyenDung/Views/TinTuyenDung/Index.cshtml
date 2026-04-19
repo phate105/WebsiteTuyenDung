@@ -1,0 +1,88 @@
+﻿@model IEnumerable<WebsiteTuyenDung.Models.Entities.TinTuyenDung>
+@using System.Linq
+@using WebsiteTuyenDung.Models.Constants
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Tin tuyển dụng";
+    ViewBag.PageTitle = "Danh sách tin tuyển dụng";
+    ViewBag.PageDescription = "Theo dõi trạng thái từng tin và thực hiện các thao tác phù hợp theo business rule.";
+}
+
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">Danh sách tin tuyển dụng</h3>
+        <div class="box-tools pull-right">
+            <a href="@Url.Action("Create", "TinTuyenDung")" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Tạo tin mới</a>
+        </div>
+    </div>
+    <div class="box-body table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Danh mục</th>
+                    <th>Ngày tạo</th>
+                    <th>Hạn nộp</th>
+                    <th>Trạng thái</th>
+                    <th>Hồ sơ</th>
+                    <th style="width: 280px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.TieuDe</strong><br />
+                                <small>@(item.DiaDiem != null ? item.DiaDiem.TenDiaDiem : "Chưa cập nhật") - @(item.LoaiHinhLamViec != null ? item.LoaiHinhLamViec.TenLoaiHinhLamViec : "Chưa cập nhật")</small>
+                            </td>
+                            <td>
+                                @(item.NganhNghe != null ? item.NganhNghe.TenNganhNghe : "Chưa cập nhật")<br />
+                                <small>@(item.CapDoKinhNghiem != null ? item.CapDoKinhNghiem.TenCapDoKinhNghiem : "Chưa cập nhật")</small>
+                            </td>
+                            <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.HanNopHoSo.ToString("dd/MM/yyyy")</td>
+                            <td><span class="label @TrangThaiTinTuyenDung.ToLabelCss(item.TrangThaiTin)">@TrangThaiTinTuyenDung.ToDisplayText(item.TrangThaiTin)</span></td>
+                            <td>
+                                <a href="@Url.Action("Index", "HoSoUngTuyen", new { tinTuyenDungId = item.TinTuyenDungId })" class="btn btn-default btn-xs">
+                                    @(item.DonUngTuyens != null ? item.DonUngTuyens.Count : 0) hồ sơ
+                                </a>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", "TinTuyenDung", new { id = item.TinTuyenDungId })" class="btn btn-info btn-xs">Chi tiết</a>
+                                @if (TrangThaiTinTuyenDung.CoTheSuaBoiEmployer(item.TrangThaiTin))
+                                {
+                                    <a href="@Url.Action("Edit", "TinTuyenDung", new { id = item.TinTuyenDungId })" class="btn btn-warning btn-xs">Sửa</a>
+                                    using (Html.BeginForm("GuiDuyet", "TinTuyenDung", FormMethod.Post, new { style = "display:inline-block" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.TinTuyenDungId" />
+                                        <button type="submit" class="btn btn-success btn-xs">Gửi duyệt</button>
+                                    }
+                                }
+                                @if (TrangThaiTinTuyenDung.CoTheDong(item.TrangThaiTin))
+                                {
+                                    using (Html.BeginForm("DongTin", "TinTuyenDung", FormMethod.Post, new { style = "display:inline-block" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.TinTuyenDungId" />
+                                        <button type="submit" class="btn btn-primary btn-xs">Đóng tin</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Chưa có tin tuyển dụng nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+﻿@model WebsiteTuyenDung.Models.Entities.DiaDiem
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Sửa địa điểm";
+    ViewBag.PageTitle = "Sửa địa điểm";
+}
+
+<div class="box box-warning">
+    <div class="box-header with-border">
+        <h3 class="box-title">Cập nhật địa điểm</h3>
+    </div>
+
+    @using (Html.BeginForm("Edit", "DiaDiem", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.DiaDiemId)
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="box-body">
+            <div class="form-group">
+                <label>Tên địa điểm</label>
+                @Html.TextBoxFor(m => m.TenDiaDiem, new { @class = "form-control", placeholder = "Nhập tên địa điểm" })
+                @Html.ValidationMessageFor(m => m.TenDiaDiem, "", new { @class = "text-danger" })
+            </div>
+            <div class="checkbox">
+                <label>@Html.CheckBoxFor(m => m.TrangThai) Đang sử dụng</label>
+            </div>
+        </div>
+        <div class="box-footer">
+            <button type="submit" class="btn btn-warning">Cập nhật</button>
+            <a href="@Url.Action("Index", "DiaDiem")" class="btn btn-default">Quay lại</a>
+        </div>
+    }
+</div>

@@ -1,0 +1,112 @@
+﻿@using System.Linq
+@using WebsiteTuyenDung.Models.Constants
+@model WebsiteTuyenDung.Models.ViewModels.DonUngTuyenDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chi tiết hồ sơ ứng tuyển";
+    ViewBag.PageTitle = "Chi tiết hồ sơ ứng tuyển";
+    ViewBag.PageDescription = "Xem hồ sơ ứng viên, CV đã chọn và cập nhật trạng thái xử lý.";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Thông tin ứng viên</h3>
+            </div>
+            <div class="box-body">
+                <dl class="dl-horizontal">
+                    <dt>Họ tên</dt>
+                    <dd>@(Model.DonUngTuyen.HoSoCaNhan != null ? Model.DonUngTuyen.HoSoCaNhan.HoTen : "Ứng viên")</dd>
+                    <dt>Email</dt>
+                    <dd>@(Model.DonUngTuyen.HoSoCaNhan != null && Model.DonUngTuyen.HoSoCaNhan.ApplicationUser != null ? Model.DonUngTuyen.HoSoCaNhan.ApplicationUser.Email : "Chưa cập nhật")</dd>
+                    <dt>Số điện thoại</dt>
+                    <dd>@(Model.DonUngTuyen.HoSoCaNhan != null ? Model.DonUngTuyen.HoSoCaNhan.SoDienThoai : "Chưa cập nhật")</dd>
+                    <dt>Địa chỉ</dt>
+                    <dd>@(Model.DonUngTuyen.HoSoCaNhan != null ? Model.DonUngTuyen.HoSoCaNhan.DiaChi : "Chưa cập nhật")</dd>
+                    <dt>Công việc ứng tuyển</dt>
+                    <dd>@(Model.DonUngTuyen.TinTuyenDung != null ? Model.DonUngTuyen.TinTuyenDung.TieuDe : "Tin tuyển dụng")</dd>
+                    <dt>CV đã nộp</dt>
+                    <dd>
+                        @if (Model.DonUngTuyen.CVUngVien != null)
+                        {
+                            <a href="@Model.DonUngTuyen.CVUngVien.DuongDanFile" target="_blank" rel="noopener">@Model.DonUngTuyen.CVUngVien.TenCV</a>
+                        }
+                        else
+                        {
+                            <span>Chưa cập nhật</span>
+                        }
+                    </dd>
+                    <dt>Ngày nộp</dt>
+                    <dd>@Model.DonUngTuyen.NgayNop.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dt>Trạng thái</dt>
+                    <dd>@TrangThaiDonUngTuyen.ToDisplayText(Model.DonUngTuyen.TrangThaiDon)</dd>
+                    <dt>Thư giới thiệu</dt>
+                    <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.DonUngTuyen.ThuGioiThieu) ? "Ứng viên chưa nhập thư giới thiệu." : Model.DonUngTuyen.ThuGioiThieu)</dd>
+                    <dt>Ghi chú xử lý</dt>
+                    <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.DonUngTuyen.GhiChuXuLy) ? "Chưa có ghi chú xử lý." : Model.DonUngTuyen.GhiChuXuLy)</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">Lịch sử xử lý</h3>
+            </div>
+            <div class="box-body">
+                @if (Model.LichSuTrangThaiDons != null && Model.LichSuTrangThaiDons.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var item in Model.LichSuTrangThaiDons)
+                        {
+                            <li style="margin-bottom: 12px;">
+                                <strong>@TrangThaiDonUngTuyen.ToDisplayText(item.TrangThaiMoi)</strong><br />
+                                <small>@item.ThoiGianThayDoi.ToString("dd/MM/yyyy HH:mm") - @(item.ApplicationUser != null ? item.ApplicationUser.Email : "Hệ thống")</small>
+                                @if (!string.IsNullOrWhiteSpace(item.GhiChu))
+                                {
+                                    <div style="white-space: pre-line; margin-top: 4px;">@item.GhiChu</div>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có lịch sử xử lý.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title">Cập nhật trạng thái</h3>
+            </div>
+            <div class="box-body">
+                @if (Model.CoTheCapNhat)
+                {
+                    using (Html.BeginForm("CapNhat", "HoSoUngTuyen", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.DonUngTuyen.DonUngTuyenId" />
+                        <div class="form-group">
+                            <label>Trạng thái đơn</label>
+                            @Html.DropDownList("trangThaiDon", Model.TrangThaiOptions, new { @class = "form-control" })
+                        </div>
+                        <div class="form-group">
+                            <label>Ghi chú xử lý</label>
+                            <textarea name="ghiChuXuLy" rows="4" class="form-control" placeholder="Nhập ghi chú xử lý cho ứng viên">@Model.DonUngTuyen.GhiChuXuLy</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning btn-block">Lưu cập nhật</button>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Đơn này đã được ứng viên rút nên không thể cập nhật thêm.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,117 @@
+﻿@using WebsiteTuyenDung.Models.Constants
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="content-language" content="vi" />
+    <title>@(ViewBag.Title ?? "Quản trị tuyển dụng") - Website tuyển dụng</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport" />
+
+    <link rel="icon" type="image/png" href="@Url.Content("~/Content/AdminLTE/favicon.ico")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/AdminLTE/bootstrap/css/bootstrap.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/AdminLTE/plugins/font-awesome/css/font-awesome.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/AdminLTE/plugins/ionicons/css/ionicons.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/AdminLTE/dist/css/AdminLTE.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/AdminLTE/dist/css/skins/_all-skins.min.css")" />
+    <style>
+        .content-wrapper {
+            min-height: calc(100vh - 101px);
+            background: #f4f6f9;
+        }
+
+        .content-header > h1 {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .content-header .page-description {
+            color: #6c757d;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .table .btn {
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .box, .info-box, .small-box {
+            box-shadow: 0 2px 8px rgba(15, 31, 53, 0.08);
+        }
+
+        .main-header .logo .brand-subtitle {
+            display: block;
+            font-size: 11px;
+            font-weight: 400;
+            line-height: 1.1;
+            opacity: 0.85;
+        }
+
+        .callout {
+            border-radius: 4px;
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+        @Html.Partial("_AdminNavbar")
+        @Html.Partial("_AdminSidebar")
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <h1>@(ViewBag.PageTitle ?? ViewBag.Title ?? "Hệ thống tuyển dụng")</h1>
+                @if (ViewBag.PageDescription != null)
+                {
+                    <p class="page-description">@ViewBag.PageDescription</p>
+                }
+            </section>
+
+            <section class="content">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        @TempData["Success"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        @TempData["Error"]
+                    </div>
+                }
+
+                @RenderBody()
+            </section>
+        </div>
+
+        @Html.Partial("_AdminFooter")
+    </div>
+
+    <script src="@Url.Content("~/Content/AdminLTE/plugins/jQuery/jQuery-2.1.4.min.js")"></script>
+    <script src="@Url.Content("~/Content/AdminLTE/bootstrap/js/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/Content/AdminLTE/plugins/fastclick/fastclick.min.js")"></script>
+    <script src="@Url.Content("~/Content/AdminLTE/plugins/slimScroll/jquery.slimscroll.min.js")"></script>
+    <script src="@Url.Content("~/Content/AdminLTE/dist/js/app.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.validate.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
