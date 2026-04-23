@@ -28,6 +28,7 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(CapDoKinhNghiem model)
         {
+            model = model ?? new CapDoKinhNghiem();
             ValidateTen(model?.TenCapDoKinhNghiem, null);
             if (!ModelState.IsValid)
             {
@@ -61,6 +62,11 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(CapDoKinhNghiem model)
         {
+            if (model == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             ValidateTen(model?.TenCapDoKinhNghiem, model?.CapDoKinhNghiemId);
             if (!ModelState.IsValid)
             {
@@ -115,6 +121,12 @@ namespace WebsiteTuyenDung.Controllers
             }
 
             var normalized = ten.Trim();
+            if (normalized.Length > 100)
+            {
+                ModelState.AddModelError("TenCapDoKinhNghiem", "Tên cấp độ kinh nghiệm tối đa 100 ký tự.");
+                return;
+            }
+
             var normalizedLower = normalized.ToLower();
             var existed = db.CapDoKinhNghiems.Any(x =>
                 x.TenCapDoKinhNghiem.ToLower() == normalizedLower

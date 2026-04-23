@@ -79,6 +79,11 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(TinTuyenDung model)
         {
+            if (model == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             var hoSoCongTy = GetHoSoCongTyHienTai();
             if (hoSoCongTy == null)
             {
@@ -132,6 +137,11 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(TinTuyenDung model)
         {
+            if (model == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             var tin = GetTinThuocEmployer(model.TinTuyenDungId, false);
             if (tin == null)
             {
@@ -304,20 +314,64 @@ namespace WebsiteTuyenDung.Controllers
             {
                 ModelState.AddModelError(nameof(model.TieuDe), "Vui lòng nhập tiêu đề tin tuyển dụng.");
             }
+            else if (model.TieuDe.Length > 200)
+            {
+                ModelState.AddModelError(nameof(model.TieuDe), "Tiêu đề tin tuyển dụng tối đa 200 ký tự.");
+            }
 
             if (string.IsNullOrWhiteSpace(model.MoTaCongViec))
             {
                 ModelState.AddModelError(nameof(model.MoTaCongViec), "Vui lòng nhập mô tả công việc.");
+            }
+            else if (model.MoTaCongViec.Length > 8000)
+            {
+                ModelState.AddModelError(nameof(model.MoTaCongViec), "Mô tả công việc tối đa 8000 ký tự.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.YeuCau) && model.YeuCau.Length > 5000)
+            {
+                ModelState.AddModelError(nameof(model.YeuCau), "Yêu cầu ứng viên tối đa 5000 ký tự.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.QuyenLoi) && model.QuyenLoi.Length > 5000)
+            {
+                ModelState.AddModelError(nameof(model.QuyenLoi), "Quyền lợi tối đa 5000 ký tự.");
             }
 
             if (model.SoLuongTuyen <= 0)
             {
                 ModelState.AddModelError(nameof(model.SoLuongTuyen), "Số lượng tuyển phải lớn hơn 0.");
             }
+            else if (model.SoLuongTuyen > 1000)
+            {
+                ModelState.AddModelError(nameof(model.SoLuongTuyen), "Số lượng tuyển không nên vượt quá 1000 người.");
+            }
 
             if (model.HanNopHoSo.Date < DateTime.Today)
             {
                 ModelState.AddModelError(nameof(model.HanNopHoSo), "Hạn nộp hồ sơ không được ở trong quá khứ.");
+            }
+            else if (model.HanNopHoSo.Date > DateTime.Today.AddYears(2))
+            {
+                ModelState.AddModelError(nameof(model.HanNopHoSo), "Hạn nộp hồ sơ không nên vượt quá 2 năm.");
+            }
+
+            if (model.LuongToiThieu.HasValue && model.LuongToiThieu.Value < 0)
+            {
+                ModelState.AddModelError(nameof(model.LuongToiThieu), "Lương tối thiểu không được âm.");
+            }
+            else if (model.LuongToiThieu.HasValue && model.LuongToiThieu.Value > 1000000000m)
+            {
+                ModelState.AddModelError(nameof(model.LuongToiThieu), "Lương tối thiểu không nên vượt quá 1 tỷ VNĐ.");
+            }
+
+            if (model.LuongToiDa.HasValue && model.LuongToiDa.Value < 0)
+            {
+                ModelState.AddModelError(nameof(model.LuongToiDa), "Lương tối đa không được âm.");
+            }
+            else if (model.LuongToiDa.HasValue && model.LuongToiDa.Value > 1000000000m)
+            {
+                ModelState.AddModelError(nameof(model.LuongToiDa), "Lương tối đa không nên vượt quá 1 tỷ VNĐ.");
             }
 
             if (model.LuongToiThieu.HasValue && model.LuongToiDa.HasValue && model.LuongToiThieu.Value > model.LuongToiDa.Value)

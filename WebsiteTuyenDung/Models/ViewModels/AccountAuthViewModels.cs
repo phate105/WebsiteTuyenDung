@@ -6,9 +6,11 @@ namespace WebsiteTuyenDung.Models.ViewModels
     {
         [Required(ErrorMessage = "Vui lòng nhập email.")]
         [EmailAddress]
+        [StringLength(256)]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
+        [StringLength(100, ErrorMessage = "Mật khẩu tối đa 100 ký tự.")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
@@ -19,6 +21,7 @@ namespace WebsiteTuyenDung.Models.ViewModels
     {
         [Required(ErrorMessage = "Vui lòng nhập email.")]
         [EmailAddress]
+        [StringLength(256)]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
@@ -27,10 +30,12 @@ namespace WebsiteTuyenDung.Models.ViewModels
         public string Password { get; set; }
 
         [DataType(DataType.Password)]
+        [Required(ErrorMessage = "Vui lòng nhập lại mật khẩu.")]
         [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         public string ConfirmPassword { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn vai trò.")]
+        [StringLength(50)]
         public string VaiTro { get; set; }
     }
 

@@ -1,0 +1,89 @@
+@using System.Linq
+@using WebsiteTuyenDung.Models.Constants
+@model WebsiteTuyenDung.Models.ViewModels.UngVienDonUngTuyenPageViewModel
+@{
+    ViewBag.Title = "Đơn ứng tuyển";
+    ViewBag.PublicBodyClass = "candidate-area";
+}
+
+<section class="clean-page">
+    <div class="container">
+        <div class="clean-heading">
+            <div>
+                <span class="clean-label">Ứng viên</span>
+                <h1>Đơn ứng tuyển</h1>
+                <p>Theo dõi các vị trí bạn đã nộp và trạng thái xử lý của từng hồ sơ.</p>
+            </div>
+            <a href="@Url.Action("Index", "Job")" class="btn btn-clean-light">Tìm việc mới</a>
+        </div>
+
+        <div class="clean-layout">
+            <aside class="clean-side">
+                <div class="clean-side-icon">
+                    <i class="bi bi-send-check"></i>
+                </div>
+                <h2>Theo dõi hồ sơ</h2>
+                <p>Các đơn đã nộp được gom lại để bạn dễ xem lại CV, trạng thái và thao tác tiếp theo.</p>
+                <ul class="clean-side-list">
+                    <li><i class="bi bi-check2-circle"></i> Xem trạng thái từng đơn</li>
+                    <li><i class="bi bi-check2-circle"></i> Mở chi tiết công việc</li>
+                    <li><i class="bi bi-check2-circle"></i> Rút đơn khi còn hiệu lực</li>
+                </ul>
+            </aside>
+
+            <div class="clean-card">
+                <div class="clean-card-header">
+                    <div>
+                        <h4>Danh sách đơn đã nộp</h4>
+                        <p>Cập nhật theo thời gian nộp mới nhất.</p>
+                    </div>
+                </div>
+                <div class="clean-card-body">
+                    @if (Model.DonUngTuyens != null && Model.DonUngTuyens.Any())
+                    {
+                        foreach (var item in Model.DonUngTuyens)
+                        {
+                            <div class="clean-list-item">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-lg-7">
+                                        <h5 class="mb-1">@item.TieuDeTin</h5>
+                                        <div class="text-muted mb-2">@item.TenCongTy</div>
+                                        <div class="list-meta">
+                                            Nộp lúc @item.NgayNop.ToString("dd/MM/yyyy HH:mm") - CV sử dụng: @item.TenCV
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5 text-lg-end">
+                                        <div class="mb-3">
+                                            <span class="badge bg-light text-dark border">@TrangThaiDonUngTuyen.ToDisplayText(item.TrangThaiDon)</span>
+                                        </div>
+                                        <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
+                                            <a href="@Url.Action("ChiTietDon", "UngVien", new { id = item.DonUngTuyenId })" class="btn btn-sm btn-clean-light">Xem chi tiết</a>
+                                            @if (item.CoTheRutDon)
+                                            {
+                                                using (Html.BeginForm("RutDon", "UngVien", FormMethod.Post, new { @class = "d-inline" }))
+                                                {
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.DonUngTuyenId" />
+                                                    <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc muốn rút đơn ứng tuyển này không?');">Rút đơn</button>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="clean-empty p-5 text-center">
+                            <h5 class="mb-3">Bạn chưa nộp đơn ứng tuyển nào</h5>
+                            <p class="text-muted mb-4">Tìm vị trí phù hợp và nộp hồ sơ.</p>
+                            <a href="@Url.Action("Index", "Job")" class="btn btn-clean-dark">Khám phá việc làm</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

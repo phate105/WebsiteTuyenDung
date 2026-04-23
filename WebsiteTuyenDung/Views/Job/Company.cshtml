@@ -1,0 +1,478 @@
+@model WebsiteTuyenDung.Models.ViewModels.CompanyDetailsViewModel
+@{
+    var company = Model.CongTy;
+    var companyName = string.IsNullOrWhiteSpace(company.TenCongTy) ? "Doanh nghiệp" : company.TenCongTy;
+    var logoUrl = company.Logo;
+    var initial = companyName.Substring(0, 1).ToUpper();
+    ViewBag.Title = companyName;
+    ViewBag.PublicBodyClass = "job-area company-detail-area";
+}
+
+@section styles {
+    <style>
+        .company-detail-page {
+            background: #f5f7f9;
+            color: #111827;
+            font-family: 'Lexend', sans-serif;
+        }
+
+        .company-detail-hero {
+            padding: 86px 0 42px;
+            background: #22262b;
+            color: #ffffff;
+        }
+
+        .company-detail-shell {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+
+        .company-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            color: rgba(255, 255, 255, .76);
+            font-size: .9rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .company-back-link:hover {
+            color: #ffffff;
+        }
+
+        .company-hero-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 28px;
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .04);
+        }
+
+        .company-identity {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        .company-logo,
+        .company-logo-fallback {
+            width: 84px;
+            height: 84px;
+            flex: 0 0 84px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, .18);
+            object-fit: contain;
+            overflow: hidden;
+        }
+
+        .company-logo {
+            padding: 8px;
+        }
+
+        .company-logo-fallback {
+            color: #111827;
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .company-eyebrow {
+            margin: 0 0 8px;
+            color: rgba(255, 255, 255, .62);
+            font-size: .76rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .company-title {
+            margin: 0;
+            color: #ffffff;
+            font-size: clamp(2rem, 4vw, 3.35rem);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -.045em;
+        }
+
+        .company-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .company-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 32px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .08);
+            color: rgba(255, 255, 255, .82);
+            font-size: .84rem;
+            font-weight: 500;
+        }
+
+        .company-hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 0 0 auto;
+        }
+
+        .company-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #111827;
+            font-size: .88rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .company-action.is-secondary {
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: transparent;
+            color: #ffffff;
+        }
+
+        .company-action:hover {
+            color: #111827;
+            background: #f3f4f6;
+        }
+
+        .company-action.is-secondary:hover {
+            background: rgba(255, 255, 255, .08);
+            color: #ffffff;
+        }
+
+        .company-detail-content {
+            padding: 42px 0 72px;
+        }
+
+        .company-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 22px;
+        }
+
+        .company-panel {
+            border: 1px solid #e1e7ec;
+            border-radius: 14px;
+            background: #ffffff;
+        }
+
+        .company-panel + .company-panel {
+            margin-top: 18px;
+        }
+
+        .company-panel-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #edf1f4;
+        }
+
+        .company-panel-header h2 {
+            margin: 0;
+            color: #111827;
+            font-size: 1.08rem;
+            font-weight: 800;
+        }
+
+        .company-panel-body {
+            padding: 22px;
+        }
+
+        .company-about {
+            margin: 0;
+            color: #4b5563;
+            font-size: .95rem;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        .company-info-list {
+            display: grid;
+            gap: 14px;
+            margin: 0;
+        }
+
+        .company-info-item {
+            display: grid;
+            gap: 4px;
+        }
+
+        .company-info-item dt {
+            color: #87929c;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .company-info-item dd {
+            margin: 0;
+            color: #111827;
+            font-size: .92rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .company-info-item a {
+            color: #111827;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .company-job-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .company-job-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 16px;
+            border: 1px solid #e6ebef;
+            border-radius: 12px;
+            background: #ffffff;
+            text-decoration: none;
+            transition: border-color .16s ease, background .16s ease, transform .16s ease;
+        }
+
+        .company-job-card:hover {
+            border-color: #c8d2da;
+            background: #fbfcfd;
+            transform: translateY(-1px);
+        }
+
+        .company-job-main {
+            min-width: 0;
+        }
+
+        .company-job-title {
+            display: -webkit-box;
+            margin: 0 0 7px;
+            overflow: hidden;
+            color: #111827;
+            font-size: .98rem;
+            font-weight: 800;
+            line-height: 1.35;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .company-job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .company-job-pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #f3f5f7;
+            color: #5b6872;
+            font-size: .75rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .company-job-link {
+            flex: 0 0 auto;
+            color: #111827;
+            font-size: .82rem;
+            font-weight: 800;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .company-empty {
+            margin: 0;
+            color: #6b7280;
+            line-height: 1.7;
+        }
+
+        @@media (max-width: 991.98px) {
+            .company-hero-card,
+            .company-identity {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .company-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .company-hero-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .company-detail-hero {
+                padding-top: 72px;
+            }
+
+            .company-hero-card {
+                padding: 22px;
+            }
+
+            .company-job-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<main class="company-detail-page">
+    <section class="company-detail-hero">
+        <div class="container">
+            <div class="company-detail-shell">
+                <a class="company-back-link" href="@Url.Action("Index", "Job")">
+                    <i class="bi bi-arrow-left"></i>
+                    Quay lại việc làm
+                </a>
+
+                <div class="company-hero-card">
+                    <div class="company-identity">
+                        @if (!string.IsNullOrWhiteSpace(logoUrl))
+                        {
+                            <img class="company-logo" src="@Url.Content(logoUrl)" alt="@companyName" />
+                        }
+                        else
+                        {
+                            <div class="company-logo-fallback">@initial</div>
+                        }
+
+                        <div>
+                            <p class="company-eyebrow">Hồ sơ công ty</p>
+                            <h1 class="company-title">@companyName</h1>
+                            <div class="company-meta">
+                                <span class="company-chip"><i class="bi bi-briefcase"></i>@Model.SoViecDangTuyen việc đang tuyển</span>
+                                @if (!string.IsNullOrWhiteSpace(company.DiaChi))
+                                {
+                                    <span class="company-chip"><i class="bi bi-geo-alt"></i>@company.DiaChi</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="company-hero-actions">
+                        <a class="company-action" href="#company-jobs">Xem việc đang tuyển</a>
+                        @if (!string.IsNullOrWhiteSpace(company.Website))
+                        {
+                            <a class="company-action is-secondary" href="@company.Website" target="_blank" rel="noopener">Website</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="company-detail-content">
+        <div class="container">
+            <div class="company-detail-shell">
+                <div class="company-layout">
+                    <div>
+                        <section class="company-panel">
+                            <div class="company-panel-header">
+                                <h2>Giới thiệu</h2>
+                            </div>
+                            <div class="company-panel-body">
+                                <p class="company-about">@(string.IsNullOrWhiteSpace(company.MoTa) ? "Doanh nghiệp đang cập nhật phần giới thiệu. Bạn có thể xem các vị trí đang tuyển bên dưới để hiểu thêm nhu cầu tuyển dụng hiện tại." : company.MoTa)</p>
+                            </div>
+                        </section>
+
+                        <section class="company-panel" id="company-jobs">
+                            <div class="company-panel-header">
+                                <h2>Việc đang tuyển</h2>
+                            </div>
+                            <div class="company-panel-body">
+                                @if (Model.Jobs != null && Model.Jobs.Any())
+                                {
+                                    <div class="company-job-list">
+                                        @foreach (var job in Model.Jobs)
+                                        {
+                                            <a class="company-job-card" href="@Url.Action("Details", "Job", new { id = job.TinTuyenDungId })">
+                                                <div class="company-job-main">
+                                                    <h3 class="company-job-title">@job.TieuDe</h3>
+                                                    <div class="company-job-meta">
+                                                        <span class="company-job-pill">@job.TenDiaDiem</span>
+                                                        <span class="company-job-pill">@job.TenLoaiHinhLamViec</span>
+                                                        <span class="company-job-pill">@job.LuongHienThi</span>
+                                                        <span class="company-job-pill">Hạn @job.HanNopHoSo.ToString("dd/MM/yyyy")</span>
+                                                    </div>
+                                                </div>
+                                                <span class="company-job-link">Chi tiết</span>
+                                            </a>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="company-empty">Công ty hiện chưa có việc làm công khai còn hạn nhận hồ sơ.</p>
+                                }
+                            </div>
+                        </section>
+                    </div>
+
+                    <aside class="company-panel">
+                        <div class="company-panel-header">
+                            <h2>Thông tin liên hệ</h2>
+                        </div>
+                        <div class="company-panel-body">
+                            <dl class="company-info-list">
+                                <div class="company-info-item">
+                                    <dt>Địa chỉ</dt>
+                                    <dd>@(string.IsNullOrWhiteSpace(company.DiaChi) ? "Chưa cập nhật" : company.DiaChi)</dd>
+                                </div>
+                                <div class="company-info-item">
+                                    <dt>Email</dt>
+                                    <dd>@(string.IsNullOrWhiteSpace(company.EmailLienHe) ? "Chưa cập nhật" : company.EmailLienHe)</dd>
+                                </div>
+                                <div class="company-info-item">
+                                    <dt>Điện thoại</dt>
+                                    <dd>@(string.IsNullOrWhiteSpace(company.SoDienThoaiLienHe) ? "Chưa cập nhật" : company.SoDienThoaiLienHe)</dd>
+                                </div>
+                                <div class="company-info-item">
+                                    <dt>Website</dt>
+                                    <dd>
+                                        @if (!string.IsNullOrWhiteSpace(company.Website))
+                                        {
+                                            <a href="@company.Website" target="_blank" rel="noopener">@company.Website</a>
+                                        }
+                                        else
+                                        {
+                                            @:Chưa cập nhật
+                                        }
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

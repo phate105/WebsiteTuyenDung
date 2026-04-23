@@ -1,9 +1,33 @@
 /********** Template CSS **********/
 :root {
-    --primary: #00B074;
-    --secondary: #2B9BFF;
-    --light: #EFFDF5;
-    --dark: #2B3940;
+    --primary: #0f8bb7;
+    --secondary: #28c7f4;
+    --light: #f4f7fa;
+    --dark: #2f3135;
+}
+
+body,
+input,
+button,
+textarea,
+select,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.job-listing,
+.job-item,
+.container,
+.content,
+.card,
+.navbar,
+.nav-link,
+.dropdown-item,
+.form-control,
+.btn {
+    font-family: 'Lexend', sans-serif !important;
 }
 
 .back-to-top {
@@ -32,14 +56,37 @@
 
 /*** Button ***/
 .btn {
-    font-family: 'Inter', sans-serif;
     font-weight: 600;
-    transition: .5s;
+    border-radius: 999px;
+    transition: .2s ease;
 }
 
 .btn.btn-primary,
 .btn.btn-secondary {
     color: #FFFFFF;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #0b7398;
+    border-color: #0b7398;
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #ffffff;
+    background-color: var(--primary);
+    border-color: var(--primary);
 }
 
 .btn-square {
@@ -258,7 +305,8 @@
     display: block;
     box-shadow: 0 0 45px rgba(0, 0, 0, .08);
     border: 1px solid transparent;
-    transition: .5s;
+    border-radius: 18px;
+    transition: .2s ease;
 }
 
 .cat-item:hover {
@@ -273,15 +321,16 @@
 }
 
 .job-item {
-    border: 1px solid transparent;
-    border-radius: 2px;
-    box-shadow: 0 0 45px rgba(0, 0, 0, .08);
-    transition: .5s;
+    border: 1px solid #e6edf2;
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(8, 35, 48, .05);
+    transition: .2s ease;
 }
 
 .job-item:hover {
-    border-color: rgba(0, 0, 0, .08);
-    box-shadow: none;
+    transform: translateY(-2px);
+    border-color: rgba(15, 139, 183, .18);
+    box-shadow: 0 22px 48px rgba(8, 35, 48, .08);
 }
 
 

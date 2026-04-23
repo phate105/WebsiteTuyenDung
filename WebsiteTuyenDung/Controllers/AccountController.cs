@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin.Security;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,8 +56,16 @@ namespace WebsiteTuyenDung.Controllers
         private IAuthenticationManager AuthenticationManager => HttpContext.GetOwinContext().Authentication;
 
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
+        public async Task<ActionResult> Login(string returnUrl)
         {
+            PreventAuthPageCaching();
+
+            var authenticatedRedirect = await RedirectAuthenticatedUserAsync(returnUrl);
+            if (authenticatedRedirect != null)
+            {
+                return authenticatedRedirect;
+            }
+
             PopulateDemoAccounts();
             ViewBag.ReturnUrl = returnUrl;
             return View(new LoginViewModel());
@@ -68,6 +77,8 @@ namespace WebsiteTuyenDung.Controllers
         public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
         {
             PopulateDemoAccounts();
+            model = model ?? new LoginViewModel();
+            model.Email = model.Email?.Trim();
 
             if (!ModelState.IsValid)
             {
@@ -106,8 +117,16 @@ namespace WebsiteTuyenDung.Controllers
         }
 
         [AllowAnonymous]
-        public ActionResult Register()
+        public async Task<ActionResult> Register()
         {
+            PreventAuthPageCaching();
+
+            var authenticatedRedirect = await RedirectAuthenticatedUserAsync();
+            if (authenticatedRedirect != null)
+            {
+                return authenticatedRedirect;
+            }
+
             return View(new RegisterViewModel
             {
                 VaiTro = "UngVien"
@@ -119,6 +138,10 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
+            model = model ?? new RegisterViewModel();
+            model.Email = model.Email?.Trim();
+            model.VaiTro = model.VaiTro?.Trim();
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -184,6 +207,34 @@ namespace WebsiteTuyenDung.Controllers
         private void PopulateDemoAccounts()
         {
             ViewBag.DemoAccounts = DemoAccounts;
+        }
+
+        private void PreventAuthPageCaching()
+        {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            Response.Cache.SetExpires(DateTime.UtcNow.AddMinutes(-1));
+        }
+
+        private async Task<ActionResult> RedirectAuthenticatedUserAsync(string returnUrl = null)
+        {
+            if (!Request.IsAuthenticated)
+            {
+                return null;
+            }
+
+            var userId = User.Identity.GetUserId();
+            var user = string.IsNullOrWhiteSpace(userId)
+                ? null
+                : await UserManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+                return null;
+            }
+
+            return await RedirectToDefaultDestinationAsync(user, returnUrl);
         }
 
         private async Task<ActionResult> RedirectToDefaultDestinationAsync(ApplicationUser user, string returnUrl = null)

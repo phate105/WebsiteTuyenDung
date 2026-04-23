@@ -8,6 +8,7 @@ using Microsoft.AspNet.Identity;
 using WebsiteTuyenDung.Models;
 using WebsiteTuyenDung.Models.Constants;
 using WebsiteTuyenDung.Models.Entities;
+using WebsiteTuyenDung.Models.Services;
 using WebsiteTuyenDung.Models.ViewModels;
 
 namespace WebsiteTuyenDung.Controllers
@@ -120,7 +121,14 @@ namespace WebsiteTuyenDung.Controllers
                 return RedirectToAction("Details", new { id });
             }
 
+            trangThaiDon = trangThaiDon?.Trim();
             ghiChuXuLy = string.IsNullOrWhiteSpace(ghiChuXuLy) ? null : ghiChuXuLy.Trim();
+            if (!string.IsNullOrWhiteSpace(ghiChuXuLy) && ghiChuXuLy.Length > 1000)
+            {
+                TempData["ErrorMessage"] = "Ghi chú xử lý tối đa 1000 ký tự.";
+                return RedirectToAction("Details", new { id });
+            }
+
             if (string.IsNullOrWhiteSpace(trangThaiDon) || !TrangThaiDonUngTuyen.EmployerCapNhatHopLe.Contains(trangThaiDon))
             {
                 TempData["ErrorMessage"] = "Trạng thái xử lý không hợp lệ.";
@@ -145,6 +153,12 @@ namespace WebsiteTuyenDung.Controllers
             }
 
             db.SaveChanges();
+            AuditLogService.Write(
+                User.Identity.GetUserId(),
+                User.Identity.Name,
+                "DonUngTuyen.CapNhat",
+                don.DonUngTuyenId.ToString(),
+                $"TrangThaiCu={trangThaiCu}; TrangThaiMoi={trangThaiDon}; TinTuyenDungId={don.TinTuyenDungId}");
 
             TempData["SuccessMessage"] = "Đã cập nhật trạng thái hồ sơ ứng tuyển.";
             return RedirectToAction("Details", new { id });

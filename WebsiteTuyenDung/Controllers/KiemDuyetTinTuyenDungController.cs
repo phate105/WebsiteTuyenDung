@@ -17,6 +17,11 @@ namespace WebsiteTuyenDung.Controllers
 
         public ActionResult Index(string trangThai = TrangThaiTinTuyenDung.ChoDuyet)
         {
+            if (!string.IsNullOrWhiteSpace(trangThai) && !LaTrangThaiTinHopLe(trangThai))
+            {
+                trangThai = TrangThaiTinTuyenDung.ChoDuyet;
+            }
+
             var query = db.TinTuyenDungs
                 .Include(x => x.HoSoCongTy)
                 .Include(x => x.NganhNghe)
@@ -114,9 +119,16 @@ namespace WebsiteTuyenDung.Controllers
                 return RedirectToAction("Details", new { id });
             }
 
+            lyDoTuChoi = lyDoTuChoi?.Trim();
             if (string.IsNullOrWhiteSpace(lyDoTuChoi))
             {
                 TempData["Error"] = "Vui lòng nhập lý do từ chối.";
+                return RedirectToAction("Details", new { id });
+            }
+
+            if (lyDoTuChoi.Length > 1000)
+            {
+                TempData["Error"] = "Lý do từ chối tối đa 1000 ký tự.";
                 return RedirectToAction("Details", new { id });
             }
 
@@ -127,7 +139,7 @@ namespace WebsiteTuyenDung.Controllers
                 TinTuyenDungId = tin.TinTuyenDungId,
                 ApplicationUserId = User.Identity.GetUserId(),
                 HanhDong = HanhDongDuyetTin.TuChoi,
-                LyDoTuChoi = lyDoTuChoi.Trim(),
+                LyDoTuChoi = lyDoTuChoi,
                 ThoiGianXuLy = DateTime.Now
             });
 
@@ -167,6 +179,16 @@ namespace WebsiteTuyenDung.Controllers
 
             TempData["Success"] = "Đã đóng tin tuyển dụng.";
             return RedirectToAction("Details", new { id });
+        }
+
+        private static bool LaTrangThaiTinHopLe(string trangThai)
+        {
+            return string.Equals(trangThai, TrangThaiTinTuyenDung.Nhap, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trangThai, TrangThaiTinTuyenDung.ChoDuyet, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trangThai, TrangThaiTinTuyenDung.DaDuyet, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trangThai, TrangThaiTinTuyenDung.BiTuChoi, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trangThai, TrangThaiTinTuyenDung.DaDong, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trangThai, TrangThaiTinTuyenDung.HetHan, StringComparison.OrdinalIgnoreCase);
         }
 
         protected override void Dispose(bool disposing)

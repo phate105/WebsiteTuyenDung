@@ -7,7 +7,7 @@
 
 <div class="register-box">
     <div class="register-logo">
-        <a href="@Url.Action("Index", "Home")"><b>Viet</b>Job</a>
+        <a href="@Url.Action("Index", "Home")" class="auth-brand-mark"><span>VietJob</span></a>
     </div>
 
     <div class="register-box-body auth-box-body">
@@ -19,7 +19,7 @@
         {
             @Html.AntiForgeryToken()
 
-            <div class="form-group has-feedback">
+            <div class="form-group register-role-field">
                 @Html.DropDownListFor(
                     m => m.VaiTro,
                     new SelectList(new[]
@@ -29,7 +29,6 @@
                     }, "Value", "Text", Model.VaiTro),
                     "-- Chọn vai trò --",
                     new { @class = "form-control" })
-                <span class="glyphicon glyphicon-user form-control-feedback"></span>
                 @Html.ValidationMessageFor(m => m.VaiTro, "", new { @class = "text-danger field-validation-error" })
             </div>
 
@@ -39,15 +38,25 @@
                 @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger field-validation-error" })
             </div>
 
-            <div class="form-group has-feedback">
+            <div class="form-group has-feedback password-field">
                 @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Mật khẩu", autocomplete = "new-password" })
-                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                <button type="button"
+                        class="password-toggle js-hold-password"
+                        data-target="Password"
+                        aria-label="Giữ để hiện mật khẩu">
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                </button>
                 @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger field-validation-error" })
             </div>
 
-            <div class="form-group has-feedback">
+            <div class="form-group has-feedback password-field">
                 @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", placeholder = "Nhập lại mật khẩu", autocomplete = "new-password" })
-                <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
+                <button type="button"
+                        class="password-toggle js-hold-password"
+                        data-target="ConfirmPassword"
+                        aria-label="Giữ để hiện mật khẩu xác nhận">
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                </button>
                 @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger field-validation-error" })
             </div>
 
@@ -62,3 +71,44 @@
         </div>
     </div>
 </div>
+
+@section scripts {
+    <script>
+        (function () {
+            function getTargetInput(button) {
+                var targetId = button.getAttribute("data-target");
+                return targetId ? document.getElementById(targetId) : null;
+            }
+
+            function showPassword(button) {
+                var input = getTargetInput(button);
+                if (!input) {
+                    return;
+                }
+
+                input.type = "text";
+                button.innerHTML = '<span class="glyphicon glyphicon-eye-close"></span>';
+            }
+
+            function hidePassword(button) {
+                var input = getTargetInput(button);
+                if (!input) {
+                    return;
+                }
+
+                input.type = "password";
+                button.innerHTML = '<span class="glyphicon glyphicon-eye-open"></span>';
+            }
+
+            document.querySelectorAll(".js-hold-password").forEach(function (button) {
+                button.addEventListener("mousedown", function () { showPassword(button); });
+                button.addEventListener("mouseup", function () { hidePassword(button); });
+                button.addEventListener("mouseleave", function () { hidePassword(button); });
+                button.addEventListener("touchstart", function () { showPassword(button); }, { passive: true });
+                button.addEventListener("touchend", function () { hidePassword(button); });
+                button.addEventListener("touchcancel", function () { hidePassword(button); });
+                button.addEventListener("blur", function () { hidePassword(button); });
+            });
+        })();
+    </script>
+}

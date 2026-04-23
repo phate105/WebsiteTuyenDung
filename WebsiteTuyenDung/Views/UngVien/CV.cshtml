@@ -1,0 +1,233 @@
+@using System.Linq
+@model WebsiteTuyenDung.Models.ViewModels.UngVienCvPageViewModel
+@{
+    ViewBag.Title = "CV của tôi";
+    ViewBag.PublicBodyClass = "candidate-area";
+}
+
+@section styles {
+    <style>
+        .cv-page-grid {
+            align-items: start;
+        }
+
+        .cv-form-stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .cv-upload-card {
+            align-self: start;
+        }
+
+        .cv-file-input {
+            min-height: 46px;
+            padding: 10px 12px;
+            line-height: 1.4;
+            background-color: #f4f6f8;
+        }
+
+        .cv-file-input::file-selector-button {
+            height: 28px;
+            margin: -2px 12px -2px 0;
+            padding: 0 12px;
+            border: 0;
+            border-radius: 8px;
+            background: #e7ebef;
+            color: #20252a;
+        }
+
+        .cv-file-input::-webkit-file-upload-button {
+            height: 28px;
+            margin: -2px 12px -2px 0;
+            padding: 0 12px;
+            border: 0;
+            border-radius: 8px;
+            background: #e7ebef;
+            color: #20252a;
+        }
+
+        .cv-delete-button {
+            border-radius: 6px;
+            min-height: 38px;
+            font-weight: 500;
+        }
+    </style>
+}
+
+<section class="clean-page">
+    <div class="container">
+        <div class="clean-heading">
+            <div>
+                <span class="clean-label">Ứng viên</span>
+                <h1>Quản lý CV</h1>
+                <p>Tải lên, đổi tên và quản lý các CV bạn dùng khi ứng tuyển.</p>
+            </div>
+            <a href="@Url.Action("HoSo", "UngVien")" class="btn btn-clean-light">Hồ sơ cá nhân</a>
+        </div>
+
+        @if (!Model.HasProfile)
+        {
+            <div class="clean-card">
+                <div class="clean-card-body">
+                    <h4 class="mb-3">Bạn chưa có hồ sơ cá nhân</h4>
+                    <p class="text-muted mb-4">Cập nhật hồ sơ trước khi tải CV.</p>
+                    <a href="@Url.Action("HoSo", "UngVien")" class="btn btn-clean-dark">Đi tới hồ sơ cá nhân</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="clean-layout">
+                <aside class="clean-side">
+                    <div class="clean-side-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <h2>CV ứng tuyển</h2>
+                    <p>Giữ CV rõ ràng và đặt tên dễ nhận biết để chọn nhanh khi nộp hồ sơ.</p>
+                    <ul class="clean-side-list">
+                        <li><i class="bi bi-check2-circle"></i> Hỗ trợ PDF, DOC, DOCX</li>
+                        <li><i class="bi bi-check2-circle"></i> Tối đa 5MB mỗi tệp</li>
+                        <li><i class="bi bi-check2-circle"></i> Có thể dùng nhiều CV</li>
+                    </ul>
+                </aside>
+
+                <div class="row g-4 cv-page-grid">
+                    <div class="col-lg-5">
+                        <div class="cv-form-stack">
+                        <div class="clean-card">
+                            <div class="clean-card-header">
+                                <div>
+                                    <h4>Tạo CV nhanh</h4>
+                                    <p>Dùng thông tin hồ sơ hiện có và bổ sung vài ý chính.</p>
+                                </div>
+                            </div>
+                            <div class="clean-card-body">
+                                @using (Html.BeginForm("TaoCV", "UngVien", FormMethod.Post, new { @class = "clean-form" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="mb-3">
+                                        <label class="form-label">Tên CV</label>
+                                        <input type="text" name="TenCV" class="form-control" value="@(Model.TaoCvForm != null ? Model.TaoCvForm.TenCV : string.Empty)" placeholder="Ví dụ: CV Business Analyst" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Vị trí mong muốn</label>
+                                        <input type="text" name="ViTriMongMuon" class="form-control" value="@(Model.TaoCvForm != null ? Model.TaoCvForm.ViTriMongMuon : string.Empty)" placeholder="Ví dụ: Nhân viên kinh doanh" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Kỹ năng chính</label>
+                                        <textarea name="KyNang" rows="3" class="form-control" placeholder="Mỗi dòng một nhóm kỹ năng.">@(Model.TaoCvForm != null ? Model.TaoCvForm.KyNang : string.Empty)</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Kinh nghiệm nổi bật</label>
+                                        <textarea name="KinhNghiem" rows="4" class="form-control" placeholder="Tóm tắt kinh nghiệm, công việc đã làm.">@(Model.TaoCvForm != null ? Model.TaoCvForm.KinhNghiem : string.Empty)</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Dự án / thành tích</label>
+                                        <textarea name="DuAnThanhTich" rows="3" class="form-control" placeholder="Các dự án, thành tích hoặc kết quả nổi bật.">@(Model.TaoCvForm != null ? Model.TaoCvForm.DuAnThanhTich : string.Empty)</textarea>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Chứng chỉ / hoạt động</label>
+                                        <textarea name="ChungChiHoatDong" rows="2" class="form-control" placeholder="Chứng chỉ, hoạt động liên quan nếu có.">@(Model.TaoCvForm != null ? Model.TaoCvForm.ChungChiHoatDong : string.Empty)</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-clean-dark w-100">Tạo CV</button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="clean-card cv-upload-card">
+                            <div class="clean-card-header">
+                                <div>
+                                    <h4>Tải lên CV mới</h4>
+                                    <p>PDF, DOC, DOCX tối đa 5MB.</p>
+                                </div>
+                            </div>
+                            <div class="clean-card-body">
+                                @using (Html.BeginForm("TaiLenCV", "UngVien", FormMethod.Post, new { enctype = "multipart/form-data", @class = "clean-form" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="mb-3">
+                                        <label class="form-label">Tên CV</label>
+                                        @Html.TextBoxFor(m => m.UploadForm.TenCV, new { @class = "form-control", placeholder = "Ví dụ: CV Frontend 2026" })
+                                        <div class="form-text">Có thể để trống để dùng tên tệp.</div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Tệp CV</label>
+                                        <input type="file" name="cvFile" class="form-control cv-file-input" accept=".pdf,.doc,.docx" />
+                                    </div>
+                                    <button type="submit" class="btn btn-clean-dark w-100">Tải lên CV</button>
+                                }
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7" id="cv-list">
+                        <div class="clean-card h-100">
+                            <div class="clean-card-header">
+                                <div>
+                                    <h4>Danh sách CV</h4>
+                                    <p>Tải xuống, đổi tên hoặc xóa CV.</p>
+                                </div>
+                            </div>
+                            <div class="clean-card-body">
+                                @if (Model.CvItems != null && Model.CvItems.Any())
+                                {
+                                    foreach (var item in Model.CvItems)
+                                    {
+                                        <div class="clean-list-item">
+                                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                                                <div>
+                                                    <h5 class="mb-1">@item.TenCV</h5>
+                                                    <div class="list-meta">
+                                                        Tải lên lúc @item.NgayTaiLen.ToString("dd/MM/yyyy HH:mm")
+                                                        @if (item.SoDonUngTuyen > 0)
+                                                        {
+                                                            <span>- Đã dùng cho @item.SoDonUngTuyen đơn</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex gap-2 flex-wrap">
+                                                    <a href="@Url.Action("TaiCVFile", "UngVien", new { id = item.CVUngVienId })" class="btn btn-sm btn-clean-light">Tải xuống</a>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-2">
+                                                <div class="col-md-8">
+                                                    @using (Html.BeginForm("CapNhatTenCV", "UngVien", FormMethod.Post, new { @class = "clean-form" }))
+                                                    {
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.CVUngVienId" />
+                                                        <div class="input-group">
+                                                            <input type="text" name="tenCV" value="@item.TenCV" class="form-control" />
+                                                            <button type="submit" class="btn btn-clean-light">Đổi tên</button>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="col-md-4 text-md-end">
+                                                    @using (Html.BeginForm("XoaCV", "UngVien", FormMethod.Post))
+                                                    {
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.CVUngVienId" />
+                                                        <button type="submit" class="btn btn-outline-danger w-100 cv-delete-button" onclick="return confirm('Bạn có chắc muốn xóa CV này không?');">Xóa CV</button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="clean-empty p-4 text-center">
+                                        <h5 class="mb-3">Bạn chưa có CV nào</h5>
+                                        <p class="text-muted mb-0">Tải lên CV để bắt đầu ứng tuyển.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

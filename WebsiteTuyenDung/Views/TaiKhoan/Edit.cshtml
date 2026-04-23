@@ -1,0 +1,162 @@
+@model WebsiteTuyenDung.Models.ViewModels.AdminTaiKhoanEditViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Chỉnh sửa tài khoản";
+    ViewBag.PageTitle = "Chỉnh sửa tài khoản";
+    ViewBag.PageDescription = "Cập nhật email, username, trạng thái, mật khẩu và thông tin liên kết người dùng.";
+}
+
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Thông tin tài khoản</h3>
+        <div class="box-tools pull-right">
+            <a href="@Url.Action("Index", "TaiKhoan")" class="btn btn-default btn-sm">Quay lại danh sách</a>
+        </div>
+    </div>
+
+    @using (Html.BeginForm("Edit", "TaiKhoan", FormMethod.Post, new { onsubmit = "return confirm('Bạn chắc chắn muốn lưu thay đổi tài khoản này? Nếu có đổi mật khẩu hoặc khóa tài khoản, người dùng có thể bị ảnh hưởng ngay.');" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.UserId)
+        @Html.HiddenFor(m => m.LaTaiKhoanHienTai)
+        @Html.HiddenFor(m => m.CoHoSoCaNhan)
+        @Html.HiddenFor(m => m.CoHoSoCongTy)
+        @Html.HiddenFor(m => m.VaiTro)
+
+        <div class="box-body">
+            @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Email</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>UserName</label>
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Vai trò</label>
+                        <input type="text" class="form-control" value="@Model.VaiTro" readonly />
+                        <p class="help-block">Không cho phép đổi vai trò tại màn hình này để tránh lệch dữ liệu hồ sơ nghiệp vụ.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Trạng thái khóa</label>
+                        <div class="checkbox">
+                            <label>
+                                @Html.CheckBoxFor(m => m.BiKhoa, Model.LaTaiKhoanHienTai ? new { disabled = "disabled" } : null)
+                                Khóa tài khoản này
+                            </label>
+                        </div>
+                        @if (Model.LaTaiKhoanHienTai)
+                        {
+                            <p class="help-block">Không thể tự khóa tài khoản admin đang đăng nhập.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Mật khẩu mới</label>
+                        @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control", autocomplete = "new-password", placeholder = "Để trống nếu không đổi mật khẩu" })
+                        @Html.ValidationMessageFor(m => m.NewPassword, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Nhập lại mật khẩu mới</label>
+                        @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", autocomplete = "new-password" })
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-info">
+                <p><strong>Lưu ý:</strong> Không thể xem mật khẩu hiện tại vì Identity chỉ lưu mật khẩu đã mã hóa. Admin có thể đặt mật khẩu mới tại đây.</p>
+            </div>
+        </div>
+
+        <div class="box box-default" style="margin: 0; border-left: 0; border-right: 0;">
+            <div class="box-header with-border">
+                <h3 class="box-title">Thông tin liên kết</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Ứng viên</h4>
+                        <div class="form-group">
+                            <label>Họ tên</label>
+                            @Html.TextBoxFor(m => m.HoTen, new { @class = "form-control", placeholder = "Tên ứng viên" })
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại</label>
+                            @Html.TextBoxFor(m => m.SoDienThoai, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.SoDienThoai, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ</label>
+                            @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control" })
+                        </div>
+                        @if (!Model.CoHoSoCaNhan)
+                        {
+                            <p class="help-block">Tài khoản chưa có hồ sơ cá nhân. Nếu vai trò là Ứng viên và có họ tên, hệ thống sẽ tạo hồ sơ cơ bản.</p>
+                        }
+                    </div>
+
+                    <div class="col-md-6">
+                        <h4>Nhà tuyển dụng / Công ty</h4>
+                        <div class="form-group">
+                            <label>Tên công ty</label>
+                            @Html.TextBoxFor(m => m.TenCongTy, new { @class = "form-control", placeholder = "Tên công ty" })
+                        </div>
+                        <div class="form-group">
+                            <label>Website</label>
+                            @Html.TextBoxFor(m => m.Website, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Website, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            <label>Email liên hệ</label>
+                            @Html.TextBoxFor(m => m.EmailLienHe, new { @class = "form-control", type = "email" })
+                            @Html.ValidationMessageFor(m => m.EmailLienHe, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            <label>Số điện thoại liên hệ</label>
+                            @Html.TextBoxFor(m => m.SoDienThoaiLienHe, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.SoDienThoaiLienHe, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ công ty</label>
+                            @Html.TextBoxFor(m => m.DiaChiCongTy, new { @class = "form-control" })
+                        </div>
+                        @if (!Model.CoHoSoCongTy)
+                        {
+                            <p class="help-block">Tài khoản chưa có hồ sơ công ty. Nếu vai trò là Nhà tuyển dụng và có tên công ty, hệ thống sẽ tạo hồ sơ công ty cơ bản.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            <a href="@Url.Action("Index", "TaiKhoan")" class="btn btn-default">Hủy</a>
+        </div>
+    }
+</div>

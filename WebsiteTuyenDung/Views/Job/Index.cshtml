@@ -1,417 +1,656 @@
-﻿
+@using System.Linq
+@model WebsiteTuyenDung.Models.ViewModels.JobIndexViewModel
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Việc làm";
+    ViewBag.PublicBodyClass = "job-area";
+
+    var hasFilters = !string.IsNullOrWhiteSpace(Model.Keyword)
+        || Model.NganhNgheId.HasValue
+        || Model.DiaDiemId.HasValue
+        || Model.LoaiHinhLamViecId.HasValue
+        || Model.CapDoKinhNghiemId.HasValue;
+
+    Func<int, string> pageUrl = pageNumber => Url.Action("Index", "Job", new
+    {
+        keyword = Model.Keyword,
+        nganhNgheId = Model.NganhNgheId,
+        diaDiemId = Model.DiaDiemId,
+        loaiHinhLamViecId = Model.LoaiHinhLamViecId,
+        capDoKinhNghiemId = Model.CapDoKinhNghiemId,
+        page = pageNumber
+    });
+
+    var startPage = Math.Max(1, Model.TrangHienTai - 2);
+    var endPage = Math.Min(Model.TongTrang, Model.TrangHienTai + 2);
+    var firstItem = Model.TongKetQua == 0 ? 0 : ((Model.TrangHienTai - 1) * Model.KichThuocTrang) + 1;
+    var lastItem = Math.Min(Model.TongKetQua, Model.TrangHienTai * Model.KichThuocTrang);
 }
 
-<section class="banner-area relative" id="home">
-    <div class="overlay overlay-bg"></div>
-    <div class="container">
-        <div class="row d-flex align-items-center justify-content-center">
-            <div class="about-content col-lg-12">
-                <h1 class="text-white">
-                    Job category
-                </h1>
-                <p class="text-white link-nav"><a href="index.html">Home </a>  <span class="lnr lnr-arrow-right"></span>  <a href="category.html"> Job category</a></p>
+@section styles {
+    <style>
+        .job-list-page {
+            background: #f4f6f8;
+            color: #111827;
+        }
+
+        .job-list-search {
+            padding: 32px 0 30px;
+            background: #25292e;
+        }
+
+        .job-list-search-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .job-tabs {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .job-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 34px;
+            padding: 0 18px;
+            border-radius: 999px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .job-tab:hover,
+        .job-tab:focus {
+            color: #ffffff;
+            background: rgba(255, 255, 255, .10);
+        }
+
+        .job-tab.is-active {
+            background: #ffffff;
+            color: #10202a;
+        }
+
+        .job-search-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .job-search-main {
+            display: grid;
+            grid-template-columns: minmax(280px, 1.1fr) minmax(240px, .9fr) 58px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, .95);
+            border-radius: 6px;
+            background: #ffffff;
+        }
+
+        .job-search-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 50px;
+            padding: 0 16px;
+            background: #ffffff;
+            border-right: 1px solid #dfe6eb;
+        }
+
+        .job-search-cell i {
+            color: #52606b;
+            font-size: 15px;
+        }
+
+        .job-search-control {
+            width: 100%;
+            border: 0;
+            padding: 0;
+            background: transparent;
+            color: #20272d;
+            font-size: 14px;
+            font-weight: 400;
+            outline: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .job-search-control:focus,
+        .job-search-control:focus-visible,
+        .job-filter-select:focus,
+        .job-filter-select:focus-visible {
+            outline: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .job-search-control::placeholder {
+            color: #8a939b;
+            opacity: 1;
+        }
+
+        select.job-search-control {
+            color: #20272d;
+        }
+
+        .job-search-submit {
+            width: 58px;
+            min-height: 50px;
+            border: 0;
+            background: #27313a;
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        .job-search-submit:hover,
+        .job-search-submit:focus {
+            background: #e12f2f;
+            color: #ffffff;
+        }
+
+        .job-filter-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .job-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(180px, 1fr)) auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .job-filter-select,
+        .job-clear-filter {
+            min-height: 42px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .job-filter-select {
+            border: 1px solid rgba(255, 255, 255, .25);
+            background-color: rgba(255, 255, 255, .96);
+            color: #2b333a;
+            box-shadow: none !important;
+        }
+
+        .job-filter-select:focus {
+            border-color: #c8d0d7;
+        }
+
+        .job-clear-filter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            color: #ffffff;
+            background: rgba(255, 255, 255, .08);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .job-clear-filter:hover,
+        .job-clear-filter:focus {
+            color: #ffffff;
+            background: rgba(255, 255, 255, .16);
+        }
+
+        .job-results {
+            padding: 28px 0 72px;
+        }
+
+        .job-results-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .job-results-count {
+            margin-bottom: 22px;
+            color: #1f2933;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .job-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 26px;
+            padding: 22px 22px 20px;
+            border: 1px solid #e1e6ea;
+            border-radius: 6px;
+            background: #ffffff;
+            box-shadow: 0 1px 2px rgba(17, 24, 39, .03);
+            transition: border-color .16s ease, transform .16s ease;
+        }
+
+        .job-card + .job-card {
+            margin-top: 14px;
+        }
+
+        .job-card:hover {
+            border-color: #b9c5ce;
+            transform: translateY(-1px);
+        }
+
+        .job-card-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .job-logo,
+        .job-logo-fallback {
+            width: 54px;
+            height: 54px;
+            flex: 0 0 54px;
+            border: 1px solid #e4e9ee;
+            border-radius: 4px;
+            background: #ffffff;
+            object-fit: contain;
+        }
+
+        .job-logo-fallback {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #d72626;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .job-company {
+            display: inline-block;
+            margin-bottom: 4px;
+            color: #4b5563;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .job-company:hover {
+            color: #111827;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .job-title {
+            margin: 0 0 7px;
+            max-width: 820px;
+            color: #101820;
+            font-size: 20px;
+            font-weight: 650;
+            line-height: 1.35;
+            letter-spacing: -.02em;
+        }
+
+        .job-title a {
+            display: -webkit-box;
+            overflow: hidden;
+            color: inherit;
+            text-decoration: none;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .job-title a:hover,
+        .job-title a:focus {
+            color: #d72626;
+        }
+
+        .job-meta-line {
+            color: #5f6d78;
+            font-size: 13px;
+        }
+
+        .job-description {
+            margin: 16px 0 14px;
+            padding-top: 14px;
+            border-top: 1px dashed #d7dfe6;
+            color: #26313a;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .job-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .job-chip {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 0 9px;
+            border-radius: 4px;
+            background: #f0f2f4;
+            color: #34404a;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1;
+        }
+
+        .job-card-actions {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding-top: 6px;
+        }
+
+        .job-apply-icon-action,
+        .job-detail-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .job-apply-icon-action {
+            width: 34px;
+            height: 34px;
+            border: 1px solid #cfd7de;
+            border-radius: 50%;
+            color: #25292e;
+            font-size: 15px;
+        }
+
+        .job-apply-icon-action:hover,
+        .job-apply-icon-action:focus {
+            color: #d72626;
+            border-color: #d72626;
+            background: #fff5f5;
+        }
+
+        .job-detail-action {
+            min-height: 34px;
+            padding: 0 18px;
+            border-radius: 999px;
+            background: #25292e;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .job-detail-action:hover,
+        .job-detail-action:focus {
+            color: #ffffff;
+            background: #16191d;
+        }
+
+        .job-empty-state {
+            padding: 48px 24px;
+            border: 1px solid #e1e6ea;
+            border-radius: 6px;
+            background: #ffffff;
+            text-align: center;
+        }
+
+        .job-empty-state h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            font-weight: 650;
+        }
+
+        .job-empty-state p {
+            margin: 0;
+            color: #66737d;
+            font-size: 14px;
+        }
+
+        .job-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 28px;
+        }
+
+        .job-page-link {
+            min-width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 11px;
+            border: 1px solid #d8e0e6;
+            border-radius: 999px;
+            background: #ffffff;
+            color: #2c333a;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .job-page-link:hover,
+        .job-page-link:focus {
+            color: #111827;
+            border-color: #aeb9c2;
+            background: #f7f8fa;
+        }
+
+        .job-page-link.is-active {
+            color: #ffffff;
+            border-color: #25292e;
+            background: #25292e;
+        }
+
+        .job-page-link.is-disabled {
+            pointer-events: none;
+            color: #a0a8af;
+            background: #f1f3f5;
+        }
+
+        @@media (max-width: 991.98px) {
+            .job-search-main,
+            .job-filter-grid,
+            .job-card {
+                grid-template-columns: 1fr;
+            }
+
+            .job-search-cell {
+                border-right: 0;
+                border-bottom: 1px solid #dfe6eb;
+            }
+
+            .job-search-submit {
+                width: 100%;
+            }
+
+            .job-card-actions {
+                padding-top: 0;
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .job-list-search {
+                padding: 24px 0;
+            }
+
+            .job-tabs {
+                overflow-x: auto;
+                padding-bottom: 2px;
+            }
+
+            .job-card {
+                padding: 18px;
+            }
+
+            .job-title {
+                font-size: 17px;
+            }
+        }
+    </style>
+}
+
+<main class="job-list-page">
+    <section class="job-list-search">
+        <div class="container">
+            <div class="job-list-search-inner">
+                <div class="job-tabs">
+                    <a href="@Url.Action("Index", "Job")" class="job-tab is-active">
+                        <i class="bi bi-search"></i>
+                        Tìm việc
+                    </a>
+                </div>
+
+                @using (Html.BeginForm("Index", "Job", FormMethod.Get, new { @class = "job-search-form" }))
+                {
+                    <div class="job-search-main">
+                        <label class="job-search-cell">
+                            <i class="bi bi-search"></i>
+                            <input type="text" name="keyword" class="job-search-control" placeholder="Tên việc, kỹ năng, công ty, từ khóa" value="@Model.Keyword" />
+                        </label>
+                        <label class="job-search-cell">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            @Html.DropDownList("diaDiemId", Model.DiaDiemOptions, "Địa điểm", new { @class = "job-search-control" })
+                        </label>
+                        <button class="job-search-submit" type="submit" aria-label="Tìm kiếm">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
+                    <div class="job-filter-toggle">
+                        <i class="bi bi-sliders"></i>
+                        Bộ lọc đầy đủ
+                    </div>
+
+                    <div class="job-filter-grid">
+                        @Html.DropDownList("nganhNgheId", Model.NganhNgheOptions, "Ngành nghề", new { @class = "form-select job-filter-select" })
+                        @Html.DropDownList("loaiHinhLamViecId", Model.LoaiHinhLamViecOptions, "Loại hình làm việc", new { @class = "form-select job-filter-select" })
+                        @Html.DropDownList("capDoKinhNghiemId", Model.CapDoKinhNghiemOptions, "Cấp độ kinh nghiệm", new { @class = "form-select job-filter-select" })
+                        @if (hasFilters)
+                        {
+                            <a href="@Url.Action("Index", "Job")" class="job-clear-filter">Xóa lọc</a>
+                        }
+                    </div>
+                }
             </div>
         </div>
-    </div>
-</section>
-<!-- End banner Area -->
-<!-- Start post Area -->
-<section class="post-area section-gap">
-    <div class="container">
-        <div class="row justify-content-center d-flex">
-            <div class="col-lg-8 post-list">
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
+    </section>
+
+    <section class="job-results" id="job-results">
+        <div class="container">
+            <div class="job-results-inner">
+                <div class="job-results-count">
+                    @Model.TongKetQua kết quả phù hợp
+                    @if (Model.TongKetQua > 0)
+                    {
+                        <span class="text-muted ms-2">Hiển thị @firstItem-@lastItem</span>
+                    }
                 </div>
 
-            </div>
-            <div class="col-lg-4 sidebar">
-                <div class="single-slidebar">
-                    <h4>Jobs by Location</h4>
-                    <ul class="cat-list">
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>New York</p><span>37</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Park Montana</p><span>57</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Atlanta</p><span>33</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Arizona</p><span>36</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Florida</p><span>47</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Rocky Beach</p><span>27</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Chicago</p><span>17</span></a></li>
-                    </ul>
-                </div>
+                @if (Model.Jobs != null && Model.Jobs.Any())
+                {
+                    foreach (var item in Model.Jobs)
+                    {
+                        var companyName = string.IsNullOrWhiteSpace(item.TenCongTy) ? "Doanh nghiệp" : item.TenCongTy;
+                        var initial = companyName.Substring(0, 1).ToUpper();
+                        var postedDate = item.NgayDang.HasValue ? item.NgayDang.Value.ToString("dd/MM/yyyy") : "gần đây";
+                        var locationText = string.IsNullOrWhiteSpace(item.TenDiaDiem) ? "Chưa cập nhật" : item.TenDiaDiem;
 
-                <div class="single-slidebar">
-                    <h4>Top rated job posts</h4>
-                    <div class="active-relatedjob-carusel">
-                        <div class="single-rated">
-                            <img class="img-fluid" src="~/Content/img/r1.jpg" alt="">
-                            <a href="single.html"><h4>Creative Art Designer</h4></a>
-                            <h6>Premium Labels Limited</h6>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                            </p>
-                            <h5>Job Nature: Full time</h5>
-                            <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                            <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                            <a href="#" class="btns text-uppercase">Apply job</a>
-                        </div>
-                        <div class="single-rated">
-                            <img class="img-fluid" src="~/Content/img/r1.jpg" alt="">
-                            <a href="single.html"><h4>Creative Art Designer</h4></a>
-                            <h6>Premium Labels Limited</h6>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                            </p>
-                            <h5>Job Nature: Full time</h5>
-                            <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                            <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                            <a href="#" class="btns text-uppercase">Apply job</a>
-                        </div>
-                        <div class="single-rated">
-                            <img class="img-fluid" src="img/r1.jpg" alt="">
-                            <a href="single.html"><h4>Creative Art Designer</h4></a>
-                            <h6>Premium Labels Limited</h6>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                            </p>
-                            <h5>Job Nature: Full time</h5>
-                            <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                            <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                            <a href="#" class="btns text-uppercase">Apply job</a>
-                        </div>
+                        <article class="job-card">
+                            <div>
+                                <div class="job-card-head">
+                                    @if (!string.IsNullOrWhiteSpace(item.LogoCongTy))
+                                    {
+                                        <img class="job-logo" src="@Url.Content(item.LogoCongTy)" alt="@companyName" />
+                                    }
+                                    else
+                                    {
+                                        <div class="job-logo-fallback">@initial</div>
+                                    }
+                                    <div>
+                                        @if (item.HoSoCongTyId.HasValue)
+                                        {
+                                            <a class="job-company" href="@Url.Action("Company", "Job", new { id = item.HoSoCongTyId.Value })">@companyName</a>
+                                        }
+                                        else
+                                        {
+                                            <div class="job-company">@companyName</div>
+                                        }
+                                        <h2 class="job-title">
+                                            <a href="@Url.Action("Details", "Job", new { id = item.TinTuyenDungId })">@item.TieuDe</a>
+                                        </h2>
+                                        <div class="job-meta-line">@locationText · Đăng @postedDate</div>
+                                    </div>
+                                </div>
+
+                                <div class="job-description">
+                                    @item.MoTaNgan
+                                </div>
+
+                                <div class="job-chip-row">
+                                    <span class="job-chip">@item.LuongHienThi</span>
+                                    <span class="job-chip">@item.TenLoaiHinhLamViec</span>
+                                    <span class="job-chip">@locationText</span>
+                                    <span class="job-chip">@item.TenCapDoKinhNghiem</span>
+                                    <span class="job-chip">Hạn nộp @item.HanNopHoSo.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+
+                            <div class="job-card-actions">
+                                <a class="job-apply-icon-action" href="@(Url.Action("Details", "Job", new { id = item.TinTuyenDungId }) + "#apply-box")" aria-label="Ứng tuyển">
+                                    <i class="bi bi-file-earmark-arrow-up"></i>
+                                </a>
+                                <a class="job-detail-action" href="@Url.Action("Details", "Job", new { id = item.TinTuyenDungId })">
+                                    Chi tiết
+                                </a>
+                            </div>
+                        </article>
+                    }
+                }
+                else
+                {
+                    <div class="job-empty-state">
+                        <h2>Không tìm thấy công việc phù hợp</h2>
+                        <p>Thử đổi từ khóa, địa điểm hoặc bỏ bớt bộ lọc để xem thêm việc làm.</p>
                     </div>
-                </div>
+                }
 
-                <div class="single-slidebar">
-                    <h4>Jobs by Category</h4>
-                    <ul class="cat-list">
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Technology</p><span>37</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Media & News</p><span>57</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Goverment</p><span>33</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Medical</p><span>36</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Restaurants</p><span>47</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Developer</p><span>27</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Accounting</p><span>17</span></a></li>
-                    </ul>
-                </div>
+                @if (Model.TongTrang > 1)
+                {
+                    <nav class="job-pagination" aria-label="Phân trang việc làm">
+                        <a class="job-page-link @(Model.TrangHienTai <= 1 ? "is-disabled" : string.Empty)" href="@(Model.TrangHienTai <= 1 ? "#" : pageUrl(Model.TrangHienTai - 1))" aria-label="Trang trước">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
 
-                <div class="single-slidebar">
-                    <h4>Carrer Advice Blog</h4>
-                    <div class="blog-list">
-                        <div class="single-blog " style="background:#000 url(img/blog1.jpg);">
-                            <a href="single.html">
-                                <h4>
-                                    Home Audio Recording <br>
-                                    For Everyone
-                                </h4>
-                            </a>
-                            <div class="meta justify-content-between d-flex">
-                                <p>
-                                    02 Hours ago
-                                </p>
-                                <p>
-                                    <span class="lnr lnr-heart"></span>
-                                    06
-                                    <span class="lnr lnr-bubble"></span>
-                                    02
-                                </p>
-                            </div>
-                        </div>
-                        <div class="single-blog " style="background:#000 url(img/blog2.jpg);">
-                            <a href="single.html">
-                                <h4>
-                                    Home Audio Recording <br>
-                                    For Everyone
-                                </h4>
-                            </a>
-                            <div class="meta justify-content-between d-flex">
-                                <p>
-                                    02 Hours ago
-                                </p>
-                                <p>
-                                    <span class="lnr lnr-heart"></span>
-                                    06
-                                    <span class="lnr lnr-bubble"></span>
-                                    02
-                                </p>
-                            </div>
-                        </div>
-                        <div class="single-blog " style="background:#000 url(img/blog1.jpg);">
-                            <a href="single.html">
-                                <h4>
-                                    Home Audio Recording <br>
-                                    For Everyone
-                                </h4>
-                            </a>
-                            <div class="meta justify-content-between d-flex">
-                                <p>
-                                    02 Hours ago
-                                </p>
-                                <p>
-                                    <span class="lnr lnr-heart"></span>
-                                    06
-                                    <span class="lnr lnr-bubble"></span>
-                                    02
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        @if (startPage > 1)
+                        {
+                            <a class="job-page-link" href="@pageUrl(1)">1</a>
+                            if (startPage > 2)
+                            {
+                                <span class="job-page-link is-disabled">...</span>
+                            }
+                        }
 
+                        @for (var pageNumber = startPage; pageNumber <= endPage; pageNumber++)
+                        {
+                            <a class="job-page-link @(pageNumber == Model.TrangHienTai ? "is-active" : string.Empty)" href="@pageUrl(pageNumber)">@pageNumber</a>
+                        }
+
+                        @if (endPage < Model.TongTrang)
+                        {
+                            if (endPage < Model.TongTrang - 1)
+                            {
+                                <span class="job-page-link is-disabled">...</span>
+                            }
+                            <a class="job-page-link" href="@pageUrl(Model.TongTrang)">@Model.TongTrang</a>
+                        }
+
+                        <a class="job-page-link @(Model.TrangHienTai >= Model.TongTrang ? "is-disabled" : string.Empty)" href="@(Model.TrangHienTai >= Model.TongTrang ? "#" : pageUrl(Model.TrangHienTai + 1))" aria-label="Trang sau">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </nav>
+                }
             </div>
         </div>
-    </div>
-</section>
-<!-- End post Area -->
-<!-- Start callto-action Area -->
-<section class="callto-action-area section-gap">
-    <div class="container">
-        <div class="row d-flex justify-content-center">
-            <div class="menu-content col-lg-9">
-                <div class="title text-center">
-                    <h1 class="mb-10 text-white">Join us today without any hesitation</h1>
-                    <p class="text-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore  et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
-                    <a class="primary-btn" href="#">I am a Candidate</a>
-                    <a class="primary-btn" href="#">Request Free Demo</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
+    </section>
+</main>

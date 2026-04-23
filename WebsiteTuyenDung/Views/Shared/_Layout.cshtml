@@ -1,131 +1,1656 @@
+@using System.Collections.Generic
+@using System.Linq
+@using WebsiteTuyenDung.Models
+@using WebsiteTuyenDung.Models.Constants
+@{
+    var pageTitle = string.IsNullOrWhiteSpace(ViewBag.Title as string) ? "VietJob" : (string)ViewBag.Title;
+    var isAuthenticated = Request.IsAuthenticated;
+    var isCandidate = isAuthenticated && User.IsInRole(ApplicationRoles.UngVien);
+    var isEmployer = isAuthenticated && User.IsInRole(ApplicationRoles.NhaTuyenDung);
+    var isAdmin = isAuthenticated && User.IsInRole(ApplicationRoles.Admin);
+    var homeUrl = Url.Action("Index", "Home");
+    var jobsUrl = Url.Action("Index", "Job");
+    var employersUrl = homeUrl + "#nha-tuyen-dung-tieu-bieu";
+    var categoriesUrl = homeUrl + "#nganh-nghe-noi-bat";
+    var navIndustryNames = new[]
+    {
+        "Công nghệ Thông tin",
+        "Kinh doanh/Bán hàng",
+        "Marketing/Quảng cáo",
+        "Hành chính/Văn phòng",
+        "Kế toán/Kiểm toán",
+        "Tài chính/Ngân hàng",
+        "Xây dựng/Kiến trúc",
+        "Nhân sự",
+        "Sản xuất/Kỹ thuật",
+        "Chăm sóc khách hàng"
+    };
+    var navLocationNames = new[]
+    {
+        "Hồ Chí Minh",
+        "Hà Nội",
+        "Đà Nẵng",
+        "Cần Thơ",
+        "Bình Dương",
+        "Hải Phòng",
+        "Đồng Nai",
+        "Quảng Ninh"
+    };
+    var navWorkTypeNames = new[]
+    {
+        "Toàn thời gian",
+        "Bán thời gian",
+        "Remote",
+        "Hybrid",
+        "Thực tập",
+        "Thời vụ"
+    };
+    Dictionary<string, int> navIndustryMap;
+    Dictionary<string, int> navLocationMap;
+    Dictionary<string, int> navWorkTypeMap;
+    using (var navDb = ApplicationDbContext.Create())
+    {
+        navIndustryMap = navDb.NganhNghes
+            .Where(x => x.TrangThai)
+            .ToList()
+            .ToDictionary(x => x.TenNganhNghe, x => x.NganhNgheId);
+        navLocationMap = navDb.DiaDiems
+            .Where(x => x.TrangThai)
+            .ToList()
+            .ToDictionary(x => x.TenDiaDiem, x => x.DiaDiemId);
+        navWorkTypeMap = navDb.LoaiHinhLamViecs
+            .Where(x => x.TrangThai)
+            .ToList()
+            .ToDictionary(x => x.TenLoaiHinhLamViec, x => x.LoaiHinhLamViecId);
+    }
+}
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="author" content="codepixer">
-    <title>@ViewBag.Title - Job Finder</title>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@pageTitle - VietJob</title>
 
-    <link rel="shortcut icon" href="~/Content/img/fav.png">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,400,300,500,600,700" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/Content/Jobentry/lib/animate/animate.min.css" rel="stylesheet" />
+    <link href="~/Content/Jobentry/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet" />
+    <link href="~/Content/Jobentry/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Jobentry/css/style.css" rel="stylesheet" />
+    <style>
+        :root {
+            --vj-nav: #2f3135;
+            --vj-nav-soft: #373a40;
+            --vj-primary: #0f8bb7;
+            --vj-accent: #28c7f4;
+            --vj-bg: #f4f7fa;
+            --vj-text: #102331;
+            --vj-muted: #617784;
+        }
 
-    <link rel="stylesheet" href="~/Content/css/linearicons.css">
-    <link rel="stylesheet" href="~/Content/css/font-awesome.min.css">
-    <link rel="stylesheet" href="~/Content/css/bootstrap.css">
-    <link rel="stylesheet" href="~/Content/css/magnific-popup.css">
-    <link rel="stylesheet" href="~/Content/css/nice-select.css">
-    <link rel="stylesheet" href="~/Content/css/animate.min.css">
-    <link rel="stylesheet" href="~/Content/css/owl.carousel.css">
-    <link rel="stylesheet" href="~/Content/css/main.css">
+        body {
+            background: var(--vj-bg);
+            color: var(--vj-text);
+        }
+
+        .public-shell {
+            width: 100%;
+            max-width: none !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            background: var(--vj-bg) !important;
+        }
+
+        .public-navbar {
+            width: 100%;
+            padding: 0;
+            background: var(--vj-nav) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            box-shadow: none;
+            top: 0 !important;
+            transition: none !important;
+            animation: none !important;
+        }
+
+        .navbar-light.sticky-top.public-navbar {
+            top: 0 !important;
+            transition: none !important;
+            animation: none !important;
+        }
+
+        .public-navbar-inner {
+            width: 100%;
+            max-width: 1320px;
+            min-height: 55px;
+            margin: 0 auto;
+            padding: 0 calc(var(--bs-gutter-x, 1.5rem) * .5);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+        }
+
+        .public-brand {
+            flex: 0 0 auto;
+            min-width: 86px;
+            height: 34px !important;
+            margin-right: 14px;
+            padding: 0 14px !important;
+            justify-content: center;
+            background: #e12f2f;
+            border: 1px solid #e12f2f;
+            border-radius: 2px;
+            text-decoration: none;
+        }
+
+        .public-brand h1 {
+            font-size: .98rem;
+            line-height: 1;
+            letter-spacing: -.045em;
+            font-weight: 750;
+            font-style: italic;
+            transform: skewX(-2deg);
+        }
+
+        .brand-viet,
+        .brand-job {
+            color: #ffffff;
+        }
+
+        .public-brand:hover,
+        .public-brand:focus {
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .public-brand:hover .brand-viet,
+        .public-brand:hover .brand-job,
+        .public-brand:focus .brand-viet,
+        .public-brand:focus .brand-job {
+            color: #23272f;
+        }
+
+        .public-navbar.navbar-light .navbar-brand,
+        .public-navbar.navbar-light a.btn {
+            height: auto !important;
+        }
+
+        .public-navbar.navbar-light .navbar-brand.public-brand {
+            height: 34px !important;
+        }
+
+        .brand-subtitle {
+            display: none;
+        }
+
+        .public-nav-collapse {
+            align-items: center;
+            justify-content: space-between;
+            flex: 1 1 auto;
+            width: auto;
+        }
+
+        .public-nav-links {
+            align-items: center;
+            align-self: stretch;
+            gap: 0;
+            margin-left: 0 !important;
+            margin-right: auto !important;
+        }
+
+        .public-navbar.navbar-light .navbar-nav.public-nav-links .nav-link {
+            margin-right: 0 !important;
+            min-height: 55px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 14px !important;
+            border-radius: 0;
+            color: #ffffff !important;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: .035em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            transition: none !important;
+        }
+
+        .public-navbar.navbar-light .navbar-nav.public-nav-links .nav-link:hover,
+        .public-mega-item:hover > .public-mega-trigger,
+        .public-mega-item:focus-within > .public-mega-trigger,
+        .public-mega-item.is-open > .public-mega-trigger {
+            background: #5d6368;
+            color: #ffffff !important;
+        }
+
+        .public-mega-item {
+            position: relative;
+        }
+
+        .public-mega-trigger {
+            cursor: pointer;
+            gap: 6px;
+        }
+
+        .public-mega-caret {
+            display: inline-flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: .8rem;
+            transition: transform .14s ease;
+        }
+
+        .public-mega-item:hover .public-mega-caret,
+        .public-mega-item:focus-within .public-mega-caret,
+        .public-mega-item.is-open .public-mega-caret {
+            transform: rotate(180deg);
+            color: #ffffff;
+        }
+
+        .public-mega-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1055;
+            width: min(720px, calc(100vw - 44px));
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: #74797c;
+            box-shadow: none;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(4px);
+            transition: none !important;
+        }
+
+        .public-about-menu {
+            width: 172px;
+            background: #74797c;
+        }
+
+        .public-mega-menu::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -8px;
+            height: 8px;
+        }
+
+        .public-mega-item:hover .public-mega-menu,
+        .public-mega-item:focus-within .public-mega-menu,
+        .public-mega-item.is-open .public-mega-menu {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .public-mega-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0;
+        }
+
+        .public-mega-grid > div {
+            padding: 12px 16px 14px;
+            border-right: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .public-mega-grid > div:last-child {
+            border-right: 0;
+        }
+
+        .public-mega-heading {
+            margin: 0 0 8px;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: .02em;
+        }
+
+        .public-mega-list {
+            display: grid;
+            gap: 0;
+        }
+
+        .public-about-list {
+            padding: 6px 0;
+        }
+
+        .public-mega-link {
+            display: block;
+            margin: 0 -10px;
+            padding: 7px 10px;
+            color: #ffffff;
+            font-size: 12.5px;
+            font-weight: 400;
+            line-height: 1.35;
+            text-decoration: none;
+        }
+
+        .public-mega-link:hover,
+        .public-mega-link:focus {
+            color: #ffffff;
+            background: #555b5f;
+            text-decoration: none;
+        }
+
+        .public-about-list .public-mega-link {
+            margin: 0;
+            padding: 10px 16px;
+            font-size: 12.5px;
+        }
+
+        .public-navbar .navbar-toggler {
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        .public-navbar .navbar-toggler-icon {
+            filter: invert(1);
+        }
+
+        .public-nav-actions {
+            flex: 0 0 auto;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .public-nav-actions .dropdown {
+            position: relative;
+        }
+
+        .public-nav-actions .dropdown::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            height: 10px;
+        }
+
+        .public-navbar .public-nav-actions .btn,
+        .public-navbar .public-nav-actions .dropdown-toggle {
+            width: auto;
+            min-width: 74px;
+            height: 32px !important;
+            min-height: 32px;
+            padding: 0 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1;
+            border-radius: 7px;
+            transition: none !important;
+        }
+
+        .public-navbar .public-nav-actions .btn:focus,
+        .public-navbar .public-nav-actions .btn:active,
+        .public-navbar .public-nav-actions .btn:focus-visible,
+        .public-navbar .public-nav-actions .dropdown-toggle:focus,
+        .public-navbar .public-nav-actions .dropdown-toggle:active,
+        .public-navbar .public-nav-actions .dropdown-toggle:focus-visible {
+            outline: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .nav-auth-group .btn {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .btn-nav-login {
+            border: 1px solid rgba(255, 255, 255, .10);
+            background: transparent;
+            color: #ffffff;
+        }
+
+        .btn-nav-login:hover,
+        .btn-nav-login:focus,
+        .btn-nav-login:active {
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(255, 255, 255, .18);
+            color: #ffffff;
+        }
+
+        .btn-nav-employer {
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .06);
+            color: #ffffff;
+        }
+
+        .btn-nav-employer:hover,
+        .btn-nav-employer:focus,
+        .btn-nav-employer:active {
+            background: rgba(255, 255, 255, .14);
+            border-color: rgba(255, 255, 255, .30);
+            color: #ffffff;
+        }
+
+        .btn-nav-register {
+            background: #f8fafc;
+            border: 1px solid #f8fafc;
+            color: #142632 !important;
+            box-shadow: none;
+        }
+
+        .btn-nav-register:hover,
+        .btn-nav-register:focus,
+        .btn-nav-register:active {
+            background: #eaf4f8;
+            border-color: #d8eaf1;
+            color: #102331 !important;
+        }
+
+        .btn-nav-account {
+            min-width: 0 !important;
+            width: 54px !important;
+            max-width: 54px;
+            gap: 6px;
+            border-radius: 9px;
+            overflow: visible;
+            color: #ffffff;
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(255, 255, 255, .12);
+            padding: 0 8px !important;
+        }
+
+        .btn-nav-account:hover,
+        .btn-nav-account:focus,
+        .btn-nav-account:active,
+        .btn-nav-account.show {
+            background: rgba(255, 255, 255, .14);
+            border-color: rgba(255, 255, 255, .22);
+            color: #ffffff;
+        }
+
+        .btn-nav-account.dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0;
+            border-top-color: rgba(255, 255, 255, .78);
+            transform: translateY(1px);
+        }
+
+        .account-chip {
+            width: 26px;
+            height: 26px;
+            flex: 0 0 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0;
+            border-radius: 50%;
+            background: #737a80;
+            color: #ffffff;
+            font-size: 11px;
+        }
+
+        .nav-bell-button {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .06);
+            color: rgba(255, 255, 255, .9);
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .nav-bell-button:hover,
+        .nav-bell-button:focus {
+            background: rgba(255, 255, 255, .12);
+            color: #ffffff;
+            outline: 0;
+        }
+
+        .nav-bell-dropdown:hover .nav-bell-button,
+        .nav-bell-dropdown:focus-within .nav-bell-button {
+            background: rgba(255, 255, 255, .12);
+            color: #ffffff;
+        }
+
+        .nav-bell-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--vj-nav);
+            border-radius: 999px;
+            background: #e12f2f;
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .public-nav-actions .dropdown-menu {
+            top: 100%;
+            left: 0 !important;
+            right: auto !important;
+            min-width: 170px;
+            margin-top: 0 !important;
+            padding: 8px;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 16px 38px rgba(15, 23, 42, .12) !important;
+            overflow: hidden;
+        }
+
+        .nav-notification-menu {
+            width: 300px;
+            max-width: calc(100vw - 32px);
+            padding: 0 !important;
+        }
+
+        .nav-notification-head {
+            padding: 12px 14px;
+            border-bottom: 1px solid #edf0f2;
+            color: #17212b;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .nav-notification-list {
+            display: grid;
+            max-height: 310px;
+            overflow-y: auto;
+        }
+
+        .nav-notification-item {
+            display: block;
+            padding: 11px 14px;
+            border-bottom: 1px solid #f0f2f4;
+            text-decoration: none;
+        }
+
+        .nav-notification-item:last-child {
+            border-bottom: 0;
+        }
+
+        .nav-notification-item:hover,
+        .nav-notification-item:focus {
+            background: #f6f7f8;
+            text-decoration: none;
+        }
+
+        .nav-notification-title {
+            display: block;
+            margin-bottom: 4px;
+            color: #20252a;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-notification-text {
+            display: block;
+            color: #66727d;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 1.45;
+        }
+
+        .nav-notification-empty {
+            padding: 18px 14px;
+            color: #66727d;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .public-nav-actions .dropdown:hover > .dropdown-menu,
+        .public-nav-actions .dropdown:focus-within > .dropdown-menu {
+            display: block;
+        }
+
+        .public-nav-actions .dropdown:hover > .btn-nav-account,
+        .public-nav-actions .dropdown:focus-within > .btn-nav-account {
+            background: rgba(255, 255, 255, .14);
+            border-color: rgba(255, 255, 255, .22);
+        }
+
+        .public-nav-actions .dropdown-item {
+            border-radius: 9px;
+            padding: 9px 10px;
+            color: #2f3438;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .public-nav-actions .dropdown-item:hover,
+        .public-nav-actions .dropdown-item:focus {
+            background: #f1f3f5;
+            color: #111827;
+        }
+
+        .public-nav-actions .dropdown-divider {
+            margin: 7px 0;
+            border-top-color: #edf0f2;
+        }
+
+        .site-alerts {
+            position: sticky;
+            top: 70px;
+            z-index: 1020;
+        }
+
+        .site-alerts .alert {
+            border-radius: 10px;
+            border-width: 1px;
+            font-size: 14px;
+            box-shadow: none !important;
+        }
+
+        .site-alerts .btn-close {
+            box-shadow: none !important;
+        }
+
+        .clean-page {
+            padding: 52px 0 76px;
+            background: #f4f7fa;
+        }
+
+        .clean-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 22px;
+            margin-bottom: 24px;
+        }
+
+        .clean-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e12f2f;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .clean-heading h1 {
+            margin: 0 0 8px;
+            color: #17212b;
+            font-size: clamp(2rem, 3vw, 2.75rem);
+            font-weight: 700;
+            letter-spacing: -.045em;
+        }
+
+        .clean-heading p {
+            max-width: 590px;
+            margin: 0;
+            color: #64727d;
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        .clean-layout {
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .clean-side {
+            border-radius: 18px;
+            padding: 24px;
+            background: #20252a;
+            color: #ffffff;
+        }
+
+        .clean-side-icon {
+            width: 58px;
+            height: 58px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            border-radius: 50%;
+            background: #e12f2f;
+            color: #ffffff;
+            font-size: 24px;
+        }
+
+        .clean-side h2 {
+            margin: 0 0 10px;
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -.025em;
+        }
+
+        .clean-side p {
+            margin: 0 0 20px;
+            color: rgba(255, 255, 255, .66);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .clean-side-list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .clean-side-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, .78);
+            font-size: 13px;
+        }
+
+        .clean-side-list i {
+            color: #ffffff;
+            opacity: .72;
+        }
+
+        .clean-card {
+            border: 1px solid #e2e8ee;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .clean-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px 24px;
+            border-bottom: 1px solid #edf1f4;
+            background: #ffffff;
+        }
+
+        .clean-card-header h4 {
+            margin: 0 0 6px;
+            color: #17212b;
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: -.025em;
+        }
+
+        .clean-card-header p {
+            margin: 0;
+            color: #7a8791;
+            font-size: 13px;
+        }
+
+        .clean-card-body {
+            padding: 24px;
+        }
+
+        .clean-form .form-label {
+            margin-bottom: 8px;
+            color: #37424b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .clean-form .form-control,
+        .clean-form .form-select {
+            min-height: 46px;
+            border: 1px solid #dce3e9;
+            border-radius: 10px;
+            color: #17212b;
+            font-size: 14px;
+            font-weight: 400;
+            box-shadow: none;
+        }
+
+        .clean-form .form-control:focus,
+        .clean-form .form-select:focus {
+            border-color: #2f3135;
+            box-shadow: 0 0 0 3px rgba(47, 49, 53, .08);
+        }
+
+        .btn-clean-dark {
+            border: 1px solid #2f3135;
+            border-radius: 10px;
+            background: #2f3135;
+            color: #ffffff;
+            font-weight: 500;
+            box-shadow: none;
+        }
+
+        .btn-clean-dark:hover,
+        .btn-clean-dark:focus {
+            border-color: #1f2327;
+            background: #1f2327;
+            color: #ffffff;
+        }
+
+        .btn-clean-light {
+            border: 1px solid #d7dee5;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #2f3135;
+            font-weight: 500;
+            box-shadow: none;
+        }
+
+        .btn-clean-light:hover,
+        .btn-clean-light:focus {
+            border-color: #2f3135;
+            background: #f8fafc;
+            color: #111418;
+        }
+
+        .clean-list-item {
+            border: 1px solid #e6edf2;
+            border-radius: 14px;
+            padding: 18px;
+            background: #ffffff;
+        }
+
+        .clean-list-item + .clean-list-item {
+            margin-top: 14px;
+        }
+
+        .clean-empty {
+            border: 1px dashed #ccd6de;
+            border-radius: 16px;
+            background: #f8fafc;
+        }
+
+        .info-page {
+            padding: 72px 0 84px;
+            background: #f4f7fa;
+        }
+
+        .info-card {
+            border: 1px solid #e2e8ee;
+            border-radius: 22px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .info-hero {
+            padding: 34px;
+            background: #20252a;
+            color: #ffffff;
+        }
+
+        .info-hero h1 {
+            margin: 0 0 12px;
+            color: #ffffff;
+            font-size: clamp(2rem, 3vw, 2.85rem);
+            font-weight: 700;
+            letter-spacing: -.045em;
+        }
+
+        .info-hero p {
+            max-width: 680px;
+            margin: 0;
+            color: rgba(255, 255, 255, .72);
+            line-height: 1.75;
+        }
+
+        .info-content {
+            padding: 34px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .info-box {
+            border: 1px solid #e6edf2;
+            border-radius: 16px;
+            padding: 20px;
+            background: #ffffff;
+        }
+
+        .info-box i {
+            color: #e12f2f;
+            font-size: 22px;
+        }
+
+        .info-box h3 {
+            margin: 14px 0 8px;
+            color: #17212b;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .info-box p,
+        .info-box a {
+            margin: 0;
+            color: #64727d;
+            font-size: 14px;
+            line-height: 1.65;
+            text-decoration: none;
+        }
+
+        .page-hero {
+            background:
+                linear-gradient(rgba(43, 57, 64, .82), rgba(43, 57, 64, .82)),
+                url('@Url.Content("~/Content/Jobentry/img/carousel-1.jpg")') center center / cover no-repeat;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--vj-nav) 0%, #0a4355 100%) !important;
+        }
+
+        .page-header .container {
+            border-left: 0 !important;
+            padding: 34px 0 !important;
+        }
+
+        .page-header .container::before,
+        .page-header .container::after {
+            display: none !important;
+        }
+
+        .page-header h1 {
+            letter-spacing: -.04em;
+        }
+
+        .job-logo {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .job-logo-fallback {
+            width: 72px;
+            height: 72px;
+            border: 1px solid rgba(0, 0, 0, .08);
+            border-radius: 10px;
+            background: #effdf5;
+            color: #00b074;
+            font-size: 28px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-list p:last-child,
+        .summary-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .empty-state {
+            border: 1px dashed rgba(0, 0, 0, .12);
+            border-radius: 16px;
+            background: #f8fafd;
+        }
+
+        .candidate-card {
+            border: 1px solid #e6edf2;
+            border-radius: 22px;
+            box-shadow: 0 16px 42px rgba(8, 35, 48, .05);
+            overflow: hidden;
+        }
+
+        .candidate-card .card-header {
+            background: #f8fbfd;
+            border-bottom: 1px solid #e6edf2;
+            border-radius: 22px 22px 0 0 !important;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .candidate-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .candidate-area,
+        .job-area {
+            background: var(--vj-bg);
+        }
+
+        .candidate-area .form-control,
+        .candidate-area .form-select,
+        .job-area .form-control,
+        .job-area .form-select {
+            min-height: 46px;
+            border-color: #dfeaf0;
+            border-radius: 14px;
+            box-shadow: none;
+        }
+
+        .candidate-area .form-control:focus,
+        .candidate-area .form-select:focus,
+        .job-area .form-control:focus,
+        .job-area .form-select:focus {
+            border-color: rgba(15, 139, 183, .45);
+            box-shadow: 0 0 0 .18rem rgba(40, 199, 244, .16);
+        }
+
+        .candidate-area .badge,
+        .job-area .badge {
+            border-radius: 999px;
+            padding: .55rem .8rem;
+        }
+
+        .job-area .bg-light.rounded,
+        .candidate-area .bg-light.rounded {
+            background: #ffffff !important;
+            border: 1px solid #e6edf2;
+            border-radius: 22px !important;
+            box-shadow: 0 16px 42px rgba(8, 35, 48, .05);
+        }
+
+        .candidate-area .animated,
+        .candidate-area .wow {
+            animation: none !important;
+            transition: none !important;
+            visibility: visible !important;
+        }
+
+        .list-meta {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .site-footer {
+            margin-top: 0;
+            background: #0f1113;
+            color: rgba(255, 255, 255, .62);
+        }
+
+        .site-footer-main {
+            padding: 72px 0 58px;
+        }
+
+        .site-footer-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 1.35fr) repeat(3, minmax(130px, .65fr));
+            gap: 56px;
+            align-items: start;
+        }
+
+        .site-footer-brand {
+            max-width: 360px;
+        }
+
+        .site-footer-logo {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 22px;
+            height: 34px;
+            padding: 0 14px;
+            border-radius: 2px;
+            background: #e12f2f;
+            color: #ffffff;
+            font-size: .98rem;
+            font-weight: 750;
+            font-style: italic;
+            letter-spacing: -.045em;
+            text-decoration: none;
+        }
+
+        .site-footer-logo:hover,
+        .site-footer-logo:focus {
+            color: #ffffff;
+        }
+
+        .site-footer-mark {
+            display: none;
+        }
+
+        .site-footer-copy {
+            margin: 0;
+            max-width: 330px;
+            color: rgba(255, 255, 255, .58);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .site-footer-title {
+            margin: 0 0 18px;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+        }
+
+        .site-footer-links {
+            display: grid;
+            gap: 12px;
+        }
+
+        .site-footer-links a {
+            color: rgba(255, 255, 255, .58);
+            font-size: 14px;
+            font-weight: 400;
+            text-decoration: none;
+        }
+
+        .site-footer-links a:hover,
+        .site-footer-links a:focus {
+            color: #ffffff;
+        }
+
+        .site-footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, .12);
+            padding: 22px 0;
+        }
+
+        .site-footer-bottom-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 18px;
+        }
+
+        .site-footer-copyright {
+            flex: 0 0 360px;
+            color: rgba(255, 255, 255, .58);
+            font-size: 13px;
+        }
+
+        .site-footer-social {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .site-footer-social a {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 50%;
+            color: rgba(255, 255, 255, .62);
+            text-decoration: none;
+        }
+
+        .site-footer-social a:hover,
+        .site-footer-social a:focus {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, .34);
+            background: rgba(255, 255, 255, .06);
+        }
+
+        @@media (max-width: 991.98px) {
+            .clean-layout,
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .clean-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .site-footer-main {
+                padding: 58px 0 44px;
+            }
+
+            .site-footer-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 38px;
+            }
+
+            .site-footer-brand {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .clean-page,
+            .info-page {
+                padding: 38px 0 58px;
+            }
+
+            .clean-card-header,
+            .clean-card-body,
+            .clean-side,
+            .info-hero,
+            .info-content {
+                padding: 20px;
+            }
+
+            .clean-card-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .site-footer-main {
+                padding: 46px 0 34px;
+            }
+
+            .site-footer-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .site-footer-bottom-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .site-footer-copyright {
+                flex-basis: auto;
+            }
+
+            .site-footer-social {
+                margin-left: 0;
+            }
+        }
+
+        @@media (max-width: 1399.98px) {
+            .public-navbar-inner {
+                max-width: 1140px;
+            }
+        }
+
+        @@media (max-width: 1199.98px) {
+            .public-navbar-inner {
+                max-width: 960px;
+            }
+        }
+
+        @@media (max-width: 991.98px) {
+            .public-navbar-inner {
+                max-width: 720px;
+                min-height: 58px;
+                gap: 16px;
+            }
+
+            .public-nav-collapse {
+                align-items: stretch;
+                margin-top: 10px;
+                padding-bottom: 14px;
+                width: 100%;
+            }
+
+            .public-nav-links {
+                align-items: flex-start;
+                gap: 0;
+            }
+
+            .public-navbar.navbar-light .navbar-nav.public-nav-links .nav-link {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 0 14px !important;
+            }
+
+            .public-mega-item {
+                width: 100%;
+            }
+
+            .public-mega-menu {
+                position: static;
+                width: 100%;
+                padding: 8px 14px 12px;
+                margin: 4px 0 8px;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+                transform: none;
+            }
+
+            .public-about-menu {
+                width: 100%;
+            }
+
+            .public-mega-menu::before {
+                display: none;
+            }
+
+            .public-mega-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .public-mega-heading {
+                margin-bottom: 4px;
+                color: rgba(255, 255, 255, .92);
+            }
+
+            .public-mega-list {
+                gap: 0;
+            }
+
+            .public-mega-link {
+                padding: 5px 0;
+                color: #ffffff;
+                font-size: 12px;
+            }
+
+            .public-mega-link:hover,
+            .public-mega-link:focus {
+                color: #ffffff;
+            }
+
+            .public-nav-actions {
+                gap: 12px;
+            }
+
+            .public-nav-actions .btn,
+            .public-nav-actions .dropdown-toggle {
+                width: 100%;
+            }
+
+            .nav-auth-group {
+                padding: 0 1.5rem 1.5rem;
+            }
+
+            .site-alerts {
+                top: 64px;
+            }
+        }
+
+        @@media (max-width: 767.98px) {
+            .public-navbar-inner {
+                max-width: 540px;
+            }
+        }
+    </style>
+    @RenderSection("styles", required: false)
 </head>
-<body>
-    <header id="header">
-        <div class="container">
-            <div class="row align-items-center justify-content-between d-flex">
-                <div id="logo">
-                    <a href="@Url.Action("Index", "Home")"><img src="~/Content/img/logo.png" alt="" title="" /></a>
+<body class="@(ViewBag.PublicBodyClass as string ?? string.Empty)">
+    <div class="container-xxl bg-white p-0 public-shell">
+        <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top p-0 public-navbar">
+            <div class="public-navbar-inner">
+            <a href="@homeUrl" class="navbar-brand d-flex align-items-center public-brand">
+                <div>
+                    <h1 class="m-0"><span class="brand-viet">Viet</span><span class="brand-job">Job</span></h1>
+                    <span class="brand-subtitle">Kết nối việc làm Việt</span>
                 </div>
-                <nav id="nav-menu-container">
-                    <ul class="nav-menu">
-                        <li class="menu-active"><a href="@Url.Action("Index", "Home")">Home</a></li>
-
-                        <li><a href="@Url.Action("About", "Home")">About Us</a></li>
-
-                        <li><a href="@Url.Action("Index", "Job")">Category</a></li>
-
-                        <li class="menu-has-children">
-                            <a href="">Pages</a>
-                            <ul>
-                                <li><a href="#">Elements</a></li>
-                                <li><a href="@Url.Action("Search", "Job")">Search</a></li>
-                            </ul>
-                        </li>
-                        @if (Request.IsAuthenticated)
-                        {
-                            <li class="menu-has-children">
-                                <a href="#">@User.Identity.Name</a>
-                                <ul>
-                                    <li>
-                                        @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
+            </a>
+            <button type="button" class="navbar-toggler me-1 ms-auto" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse public-nav-collapse" id="navbarCollapse">
+                <div class="navbar-nav p-4 p-lg-0 public-nav-links">
+                    <div class="nav-item public-mega-item">
+                        <a href="@jobsUrl" class="nav-link public-mega-trigger" aria-expanded="false">
+                            <span>Việc làm</span>
+                            <i class="bi bi-chevron-down public-mega-caret"></i>
+                        </a>
+                        <div class="public-mega-menu" aria-label="Bộ lọc việc làm nhanh">
+                            <div class="public-mega-grid">
+                                <div>
+                                    <p class="public-mega-heading">Việc theo ngành nghề</p>
+                                    <div class="public-mega-list">
+                                        @foreach (var item in navIndustryNames)
                                         {
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" style="background:none;border:none;cursor:pointer;padding:10px 15px;width:100%;text-align:left;">Đăng xuất</button>
+                                            var itemUrl = navIndustryMap.ContainsKey(item)
+                                                ? Url.Action("Index", "Job", new { nganhNgheId = navIndustryMap[item] })
+                                                : Url.Action("Index", "Job", new { keyword = item });
+                                            <a class="public-mega-link" href="@itemUrl">@item</a>
                                         }
-                                    </li>
-                                </ul>
-                            </li>
-                        }
-                        else
-                        {
-                            <li><a class="ticker-btn" href="@Url.Action("Register", "Account")">Signup</a></li>
-                            <li><a class="ticker-btn" href="@Url.Action("Login", "Account")">Login</a></li>
-                        }
-                    </ul>
-                </nav>
-            </div>
-        </div>
-    </header>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="public-mega-heading">Việc theo địa điểm</p>
+                                    <div class="public-mega-list">
+                                        @foreach (var item in navLocationNames)
+                                        {
+                                            var itemUrl = navLocationMap.ContainsKey(item)
+                                                ? Url.Action("Index", "Job", new { diaDiemId = navLocationMap[item] })
+                                                : Url.Action("Index", "Job", new { keyword = item });
+                                            <a class="public-mega-link" href="@itemUrl">@item</a>
+                                        }
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="public-mega-heading">Việc theo loại hình</p>
+                                    <div class="public-mega-list">
+                                        @foreach (var item in navWorkTypeNames)
+                                        {
+                                            var itemUrl = navWorkTypeMap.ContainsKey(item)
+                                                ? Url.Action("Index", "Job", new { loaiHinhLamViecId = navWorkTypeMap[item] })
+                                                : Url.Action("Index", "Job", new { keyword = item });
+                                            <a class="public-mega-link" href="@itemUrl">@item</a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-item public-mega-item">
+                        <a href="@Url.Action("About", "Home")" class="nav-link public-mega-trigger" aria-expanded="false">
+                            <span>Về chúng tôi</span>
+                            <i class="bi bi-chevron-down public-mega-caret"></i>
+                        </a>
+                        <div class="public-mega-menu public-about-menu" aria-label="Thông tin VietJob">
+                            <div class="public-mega-list public-about-list">
+                                <a class="public-mega-link" href="@Url.Action("About", "Home")">Giới thiệu</a>
+                                <a class="public-mega-link" href="@Url.Action("Contact", "Home")">Liên hệ</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="@employersUrl" class="nav-item nav-link">Nhà tuyển dụng</a>
+                    <a href="@categoriesUrl" class="nav-item nav-link">Ngành nghề</a>
+                </div>
 
-    <div class="main-content">
+                <div class="d-lg-flex align-items-center nav-auth-group public-nav-actions pe-lg-0">
+                    @if (!isAuthenticated)
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-nav-login">Đăng nhập</a>
+                        <a href="@Url.Action("Register", "Account")" class="btn btn-primary btn-nav-register">Đăng ký</a>
+                    }
+                    else
+                    {
+                        var dashboardAction = isAdmin ? "AdminDashboard" : "EmployerDashboard";
+                        <div class="dropdown nav-bell-dropdown">
+                            <button type="button" class="nav-bell-button" aria-label="Thông báo">
+                                <i class="bi bi-bell"></i>
+                            </button>
+                            <div class="dropdown-menu nav-notification-menu">
+                                <div class="nav-notification-head">Thông báo</div>
+                                <div class="nav-notification-empty">Chưa có thông báo mới.</div>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-light btn-nav-account dropdown-toggle" aria-expanded="false" aria-label="Tài khoản">
+                                <span class="account-chip"><i class="bi bi-person-fill"></i></span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                @if (isCandidate)
+                                {
+                                    <a class="dropdown-item" href="@Url.Action("HoSo", "UngVien")">Quản lý hồ sơ</a>
+                                    <a class="dropdown-item" href="@Url.Action("CV", "UngVien")">Quản lý CV</a>
+                                    <a class="dropdown-item" href="@Url.Action("DonUngTuyen", "UngVien")">Đơn ứng tuyển</a>
+                                }
+                                else
+                                {
+                                    <a class="dropdown-item" href="@Url.Action(dashboardAction, "Home")">Trang quản lý</a>
+                                }
+                                <div class="dropdown-divider"></div>
+                                @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "mb-0" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            </div>
+        </nav>
+
+        <div class="site-alerts">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="container pt-3">
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-0 js-auto-alert" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                    </div>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="container pt-3">
+                    <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-0 js-auto-alert" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                    </div>
+                </div>
+            }
+        </div>
+
         @RenderBody()
+
+        <footer class="site-footer">
+            <div class="site-footer-main">
+                <div class="container">
+                    <div class="site-footer-grid">
+                        <div class="site-footer-brand">
+                            <a class="site-footer-logo" href="@homeUrl" aria-label="VietJob">
+                                VietJob
+                            </a>
+                            <p class="site-footer-copy">
+                                Nền tảng kết nối ứng viên và nhà tuyển dụng tại Việt Nam.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h6 class="site-footer-title">Ứng viên</h6>
+                            <div class="site-footer-links">
+                                <a href="@jobsUrl">Tìm việc</a>
+                                <a href="@categoriesUrl">Ngành nghề</a>
+                                <a href="@jobsUrl">Địa điểm</a>
+                                <a href="@employersUrl">Công ty</a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h6 class="site-footer-title">Nhà tuyển dụng</h6>
+                            <div class="site-footer-links">
+                                <a href="@Url.Action("Create", "TinTuyenDung")">Đăng tin tuyển dụng</a>
+                                <a href="@Url.Action("Index", "TinTuyenDung")">Quản lý tin</a>
+                                <a href="@Url.Action("EmployerDashboard", "Home")">Tìm ứng viên</a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h6 class="site-footer-title">Hệ thống</h6>
+                            <div class="site-footer-links">
+                                <a href="@Url.Action("About", "Home")">Giới thiệu</a>
+                                <a href="@Url.Action("Contact", "Home")">Liên hệ</a>
+                                <a href="@homeUrl">Điều khoản</a>
+                                <a href="@homeUrl">Chính sách</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="site-footer-bottom">
+                <div class="container">
+                    <div class="site-footer-bottom-row">
+                        <div class="site-footer-copyright">© @DateTime.Now.Year VietJob</div>
+                        <div class="site-footer-social" aria-label="Mạng xã hội">
+                            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
     </div>
 
-    <footer class="footer-area section-gap">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-12">
-                    <div class="single-footer-widget">
-                        <h6>Top Products</h6>
-                        <ul class="footer-nav">
-                            <li><a href="#">Managed Website</a></li>
-                            <li><a href="#">Power Tools</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-12">
-                    <div class="single-footer-widget newsletter">
-                        <h6>Newsletter</h6>
-                        <p>You can trust us. we only send promo offers, not a single spam.</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-12">
-                    <div class="single-footer-widget mail-chimp">
-                        <h6 class="mb-20">Instagram Feed</h6>
-                        <ul class="instafeed d-flex flex-wrap">
-                            <li><img src="~/Content/img/i1.jpg" alt=""></li>
-                            <li><img src="~/Content/img/i2.jpg" alt=""></li>
-                            <li><img src="~/Content/img/i3.jpg" alt=""></li>
-                            <li><img src="~/Content/img/i4.jpg" alt=""></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="row footer-bottom d-flex justify-content-between">
-                <p class="col-lg-8 col-sm-12 footer-text m-0 text-white">
-                    Copyright &copy; @DateTime.Now.Year All rights reserved
-                </p>
-            </div>
-        </div>
-    </footer>
+    <script src="~/Content/Jobentry/js/jquery-3.7.0.min.js"></script>
+    <script src="~/Content/Jobentry/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Content/Jobentry/lib/wow/wow.min.js"></script>
+    <script src="~/Content/Jobentry/lib/easing/easing.min.js"></script>
+    <script src="~/Content/Jobentry/lib/waypoints/waypoints.min.js"></script>
+    <script src="~/Content/Jobentry/lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="~/Content/Jobentry/js/main.js"></script>
+    <script>
+        (function () {
+            document.querySelectorAll('.js-auto-alert').forEach(function (alertNode) {
+                window.setTimeout(function () {
+                    if (window.bootstrap && window.bootstrap.Alert) {
+                        window.bootstrap.Alert.getOrCreateInstance(alertNode).close();
+                    } else {
+                        alertNode.classList.remove('show');
+                        window.setTimeout(function () {
+                            if (alertNode.parentNode) {
+                                alertNode.parentNode.removeChild(alertNode);
+                            }
+                        }, 180);
+                    }
+                }, 3500);
+            });
 
-    @*@Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")*@
+            var megaItems = document.querySelectorAll('.public-mega-item');
 
-    <script src="~/Scripts/js/vendor/jquery-2.2.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
-    <script src="~/Scripts/js/vendor/bootstrap.min.js"></script>
-    <script src="~/Scripts/js/easing.min.js"></script>
-    <script src="~/Scripts/js/hoverIntent.js"></script>
-    <script src="~/Scripts/js/superfish.min.js"></script>
-    <script src="~/Scripts/js/jquery.ajaxchimp.min.js"></script>
-    <script src="~/Scripts/js/jquery.magnific-popup.min.js"></script>
-    <script src="~/Scripts/js/owl.carousel.min.js"></script>
-    <script src="~/Scripts/js/jquery.sticky.js"></script>
-    <script src="~/Scripts/js/jquery.nice-select.min.js"></script>
-    <script src="~/Scripts/js/parallax.min.js"></script>
-    <script src="~/Scripts/js/mail-script.js"></script>
-    <script src="~/Scripts/js/main.js"></script>
+            function closeMegaMenus() {
+                megaItems.forEach(function (item) {
+                    item.classList.remove('is-open');
+                    var trigger = item.querySelector('.public-mega-trigger');
+                    if (trigger) {
+                        trigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
 
+            megaItems.forEach(function (item) {
+                var trigger = item.querySelector('.public-mega-trigger');
+                if (!trigger) {
+                    return;
+                }
+
+                trigger.addEventListener('click', function (event) {
+                    if (window.innerWidth < 992) {
+                        return;
+                    }
+
+                    if (!item.classList.contains('is-open')) {
+                        event.preventDefault();
+                        closeMegaMenus();
+                        item.classList.add('is-open');
+                        trigger.setAttribute('aria-expanded', 'true');
+                    }
+                });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!event.target.closest('.public-mega-item')) {
+                    closeMegaMenus();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeMegaMenus();
+                }
+            });
+
+            window.addEventListener('resize', closeMegaMenus);
+        })();
+    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>
