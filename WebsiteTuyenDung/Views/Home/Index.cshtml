@@ -1,693 +1,2022 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+@using System.Collections.Generic
+@using System.IO
+@using System.Linq
+@using WebsiteTuyenDung.Models.ViewModels
+@model HomeIndexViewModel
+@{
+    ViewBag.Title = "Trang chủ";
+    ViewBag.PublicBodyClass = "home-landing";
+
+    var featuredJobsSource = (Model.TinTuyenDungMoiNhat ?? Enumerable.Empty<PublicJobCardViewModel>()).Take(48).ToList();
+    var featuredJobs = featuredJobsSource
+        .Select((job, index) => new { Job = job, Sort = (index * 7) % Math.Max(1, featuredJobsSource.Count), Index = index })
+        .OrderBy(x => x.Sort)
+        .ThenBy(x => x.Index)
+        .Select(x => x.Job)
+        .ToList();
+    var jobsPerPage = 12;
+    var totalJobPages = Math.Max(1, (int)Math.Ceiling(featuredJobs.Count / (double)jobsPerPage));
+    var featuredEmployers = (Model.NhaTuyenDungTieuBieu ?? Enumerable.Empty<FeaturedEmployerViewModel>()).ToList();
+    var employerCards = featuredEmployers.Take(12).ToList();
+
+    var featuredCategories = (Model.NganhNgheNoiBat ?? Enumerable.Empty<PublicHomeCategoryViewModel>()).Take(8).ToList();
+    var quickCategories = featuredCategories.Take(3).ToList();
+    var categoryIcons = new[] { "bi-code-square", "bi-bar-chart-line", "bi-briefcase", "bi-megaphone", "bi-people", "bi-headset", "bi-gear", "bi-calculator" };
+    var testimonials = new[]
+    {
+        new { Name = "Minh Anh", Company = "Ứng viên Marketing", Avatar = "~/Content/Jobentry/img/testimonial-1.jpg", Text = "Mình hay lọc theo ngành rồi lưu lại vài tin phù hợp. Thông tin lương và địa điểm rõ nên đỡ mất thời gian mở từng tin." },
+        new { Name = "Quốc Huy", Company = "Sales Executive", Avatar = "~/Content/Jobentry/img/testimonial-2.jpg", Text = "Giao diện danh sách việc khá dễ lướt. Mình nộp CV xong theo dõi trạng thái đơn luôn, không phải ghi chú riêng như trước." },
+        new { Name = "Hoàng Nam", Company = "Lập trình viên .NET", Avatar = "~/Content/Jobentry/img/testimonial-3.jpg", Text = "Phần lọc theo địa điểm và loại hình làm việc giúp mình tìm job hybrid nhanh hơn. Tin nào còn hạn nhìn cũng khá rõ." },
+        new { Name = "Thanh Trúc", Company = "Kế toán tổng hợp", Avatar = "~/Content/Jobentry/img/testimonial-4.jpg", Text = "Mình thích cách công ty và vị trí được trình bày gọn. Không bị quá nhiều chữ nên xem trên điện thoại cũng ổn." },
+        new { Name = "Gia Bảo", Company = "HR Intern", Avatar = "~/Content/Jobentry/img/testimonial-1.jpg", Text = "Các ngành nghề được chia dễ hiểu. Với người mới đi tìm việc như mình thì vào trang là biết nên bắt đầu từ đâu." },
+        new { Name = "Ngọc Linh", Company = "Nhân viên văn phòng", Avatar = "~/Content/Jobentry/img/testimonial-2.jpg", Text = "Nộp hồ sơ khá gọn. Mình xem lại các đơn đã gửi được nên cảm giác chủ động hơn." }
+    };
+    var employerRuntimeLogos = new List<Tuple<string, string>>();
+    var employerLogoFolder = Server.MapPath("~/Content/Jobentry/img/employers/");
+    var employerLogoExtensions = new[] { ".png", ".jpg", ".jpeg", ".webp", ".svg" };
+    if (!string.IsNullOrWhiteSpace(employerLogoFolder) && Directory.Exists(employerLogoFolder))
+    {
+        employerRuntimeLogos = Directory.EnumerateFiles(employerLogoFolder)
+            .Where(file => employerLogoExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
+            .Where(file =>
+            {
+                var logoName = Path.GetFileNameWithoutExtension(file).ToLowerInvariant();
+                return !logoName.Contains("shopee")
+                    && !logoName.Contains("lazada")
+                    && !logoName.Contains("honda")
+                    && !logoName.Contains("yamaha");
+            })
+            .OrderBy(file => Path.GetFileName(file))
+            .Select(file => Tuple.Create(Path.GetFileNameWithoutExtension(file), Url.Content("~/Content/Jobentry/img/employers/" + Path.GetFileName(file))))
+            .ToList();
+    }
 }
 
-<section class="banner-area relative" id="home">
-    <div class="overlay overlay-bg"></div>
+@functions {
+    private string CompactSalary(string salary)
+    {
+        if (string.IsNullOrWhiteSpace(salary) || salary.IndexOf("Thỏa thuận", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return "Thỏa thuận";
+        }
+
+        var matches = System.Text.RegularExpressions.Regex.Matches(salary, @"\d[\d\.,]*");
+        if (matches.Count >= 2)
+        {
+            return string.Format("{0}-{1} triệu", ToMillionText(matches[0].Value), ToMillionText(matches[1].Value));
+        }
+
+        if (matches.Count == 1)
+        {
+            var prefix = salary.StartsWith("Đến", StringComparison.OrdinalIgnoreCase) ? "Đến " : salary.StartsWith("Từ", StringComparison.OrdinalIgnoreCase) ? "Từ " : string.Empty;
+            return string.Format("{0}{1} triệu", prefix, ToMillionText(matches[0].Value));
+        }
+
+        return salary;
+    }
+
+    private string ToMillionText(string value)
+    {
+        decimal amount;
+        var normalized = value.Replace(".", string.Empty).Replace(",", string.Empty);
+        if (!decimal.TryParse(normalized, out amount))
+        {
+            return value;
+        }
+
+        var million = Math.Floor(amount / 1000000m);
+        return million.ToString("0");
+    }
+}
+
+@section styles {
+    <style>
+        .home-landing {
+            background: #f4f7fa;
+            color: #102331;
+        }
+
+            .home-landing .public-shell,
+            .home-landing .container-xxl.bg-white.p-0 {
+                width: 100% !important;
+                max-width: 100% !important;
+                background: #f4f7fa !important;
+            }
+
+            .home-landing .public-navbar {
+                padding: 0;
+                background: #2f3135 !important;
+                border-bottom: 1px solid rgba(255, 255, 255, .08);
+                box-shadow: none;
+            }
+
+            .home-landing .public-navbar-inner {
+                padding-left: calc(var(--bs-gutter-x, 1.5rem) * .5);
+                padding-right: calc(var(--bs-gutter-x, 1.5rem) * .5);
+            }
+
+            .home-landing .public-nav-links .nav-link,
+            .home-landing .btn-nav-login,
+            .home-landing .btn-nav-account {
+                color: #ffffff !important;
+            }
+
+            .home-landing .public-nav-links .nav-link {
+                opacity: 1;
+            }
+
+                .home-landing .public-nav-links .nav-link:hover,
+                .home-landing .public-nav-links .nav-link.active {
+                    color: #ffffff !important;
+                }
+
+            .home-landing .public-brand,
+            .home-landing .public-nav-links .nav-link {
+                position: relative;
+            }
+
+                .home-landing .public-nav-links .nav-link::after {
+                    display: none;
+                }
+
+                .home-landing .public-nav-links .nav-link:hover::after,
+                .home-landing .public-nav-links .nav-link.active::after {
+                    display: none;
+                }
+
+            .home-landing .navbar-light .navbar-toggler {
+                border-color: rgba(255, 255, 255, .18);
+            }
+
+            .home-landing .navbar-light .navbar-toggler-icon {
+                filter: invert(1);
+            }
+
+            .home-landing .btn-nav-login {
+                background: transparent;
+                border-color: rgba(255, 255, 255, .12);
+            }
+
+                .home-landing .btn-nav-login:hover,
+                .home-landing .btn-nav-login:focus,
+                .home-landing .btn-nav-login:active {
+                    background: rgba(255, 255, 255, .08);
+                    border-color: rgba(255, 255, 255, .18);
+                    color: #ffffff !important;
+                }
+
+            .home-landing .btn-nav-employer {
+                background: rgba(255, 255, 255, .08);
+                border-color: rgba(255, 255, 255, .10);
+                color: #ffffff;
+            }
+
+                .home-landing .btn-nav-employer:hover,
+                .home-landing .btn-nav-employer:focus,
+                .home-landing .btn-nav-employer:active {
+                    background: rgba(255, 255, 255, .12);
+                    border-color: rgba(255, 255, 255, .16);
+                    color: #ffffff;
+                }
+
+            .home-landing .btn-nav-register {
+                background: #f8fafc;
+                border-color: #f8fafc;
+                color: #142632 !important;
+                box-shadow: none;
+            }
+
+                .home-landing .btn-nav-register:hover,
+                .home-landing .btn-nav-register:focus,
+                .home-landing .btn-nav-register:active {
+                    background: #eaf4f8;
+                    border-color: #d8eaf1;
+                    color: #102331 !important;
+                }
+
+            .home-landing .btn-nav-account {
+                background: rgba(255, 255, 255, .08);
+                border-color: rgba(255, 255, 255, .1);
+            }
+
+                .home-landing .btn-nav-account:hover,
+                .home-landing .btn-nav-account:focus {
+                    background: rgba(255, 255, 255, .12);
+                    border-color: rgba(255, 255, 255, .18);
+                    color: #ffffff !important;
+                }
+
+            .home-landing .account-chip {
+                background: #737a80;
+            }
+
+            .home-landing .home-hero {
+                position: relative;
+                overflow: visible;
+                width: 100%;
+                min-height: 468px;
+                padding: 92px 0 98px;
+                display: flex;
+                align-items: center;
+                background-image: url('@Url.Content("~/Content/Jobentry/img/hero/bgrRoot.jpg")');
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+
+                .home-landing .home-hero::before {
+                    position: absolute;
+                    content: "";
+                    inset: 0;
+                    background: rgba(6, 24, 32, .48);
+                    pointer-events: none;
+                }
+
+                .home-landing .home-hero .container {
+                    position: relative;
+                    z-index: 1;
+                    max-width: 1240px;
+                }
+
+            .home-landing .hero-grid {
+                align-items: center;
+                justify-content: center;
+            }
+
+            .home-landing .hero-grid > .col-lg-6:first-child {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .home-landing .hero-grid > .col-lg-6:last-child {
+                display: none;
+            }
+
+            .home-landing .hero-copy {
+                max-width: 980px;
+                margin: 0 auto;
+                text-align: center;
+                transform: translateY(18px);
+            }
+
+            .home-landing .hero-badge {
+                display: none;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 18px;
+                padding: 10px 14px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, .08);
+                border: 1px solid rgba(255, 255, 255, .12);
+                color: #dff7ff;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+            }
+
+                .home-landing .hero-badge i {
+                    color: #28c7f4;
+                }
+
+            .home-landing .hero-copy h1 {
+                margin-bottom: 18px;
+                color: #ffffff;
+                font-size: clamp(2.15rem, 3.35vw, 3.25rem);
+                line-height: 1.12;
+                font-weight: 650;
+                letter-spacing: -.035em;
+                white-space: nowrap;
+            }
+
+            .home-landing .hero-copy p {
+                max-width: 520px;
+                margin: 0 auto 34px;
+                color: rgba(255, 255, 255, .88);
+                font-size: .98rem;
+                line-height: 1.5;
+                font-weight: 300;
+            }
+
+            .home-landing .hero-search-panel {
+                max-width: 1040px;
+                margin: 0 auto;
+                padding: 0;
+                border-radius: 0;
+                background: transparent;
+                border: 0;
+                box-shadow: none;
+                backdrop-filter: none;
+                position: relative;
+                z-index: 3;
+            }
+
+            .home-landing .hero-search-grid {
+                display: grid;
+                grid-template-columns: minmax(260px, 1.6fr) minmax(190px, 1fr) minmax(190px, 1fr) 112px;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .home-landing .hero-search-field {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 48px;
+                padding: 0 14px;
+                position: relative;
+                border-radius: 6px;
+                background: #ffffff;
+                border: 1px solid #d8dee3;
+                transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+            }
+
+                .home-landing .hero-search-field:focus-within {
+                    background: #ffffff;
+                    border-color: #9ca3af;
+                    box-shadow: none;
+                }
+
+                .home-landing .hero-search-field:not(:last-of-type) {
+                    position: relative;
+            }
+
+                .home-landing .hero-search-field i {
+                    color: #999999;
+                    font-size: 1rem;
+                    opacity: 1;
+                }
+
+                .home-landing .hero-search-field .form-control,
+                .home-landing .hero-search-field .form-select {
+                    border: 0;
+                    padding: 0;
+                    background: transparent;
+                    box-shadow: none;
+                    color: #2f3438;
+                    font-size: .92rem;
+                    font-weight: 400;
+                    min-height: auto;
+                }
+
+                    .home-landing .hero-search-field .form-control::placeholder {
+                        color: #999999;
+                        font-weight: 300;
+                    }
+
+            .home-landing .hero-search-button {
+                width: 100%;
+                min-width: 0;
+                min-height: 48px;
+                border-radius: 6px;
+                border: 0;
+                background: #30363b;
+                color: #ffffff;
+                font-weight: 400;
+                letter-spacing: 0;
+                box-shadow: none !important;
+                transition: background .18s ease, border-color .18s ease;
+            }
+
+                .home-landing .hero-search-button:hover,
+                .home-landing .hero-search-button:focus {
+                    background: #20252a;
+                    color: #ffffff;
+                    transform: none;
+                    box-shadow: none !important;
+                }
+
+            .home-landing .hero-search-dropdown {
+                position: static;
+            }
+
+            .home-landing .hero-filter-toggle {
+                width: 100%;
+                border: 0;
+                padding: 0;
+                background: transparent;
+                color: #999999;
+                font-size: .92rem;
+                font-weight: 300;
+                text-align: left;
+                box-shadow: none !important;
+            }
+
+                .home-landing .hero-filter-toggle.has-value {
+                    color: #2f3438;
+                    font-weight: 400;
+                }
+
+                .home-landing .hero-filter-toggle::after {
+                    position: absolute;
+                    right: 14px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #999999;
+                }
+
+            .home-landing .hero-filter-menu {
+                width: 320px;
+                min-width: 320px;
+                max-width: min(420px, calc(100vw - 32px));
+                max-height: 360px;
+                overflow-y: auto;
+                top: calc(100% + 8px) !important;
+                left: 0 !important;
+                right: auto !important;
+                transform: none !important;
+                margin-top: 0 !important;
+                margin-left: 0 !important;
+                padding: 8px;
+                border: 1px solid #dce8ef;
+                border-radius: 16px;
+                background: #ffffff;
+                box-shadow: 0 18px 42px rgba(8, 35, 48, .14);
+                z-index: 1080;
+            }
+
+                .home-landing .hero-filter-menu .dropdown-item {
+                    display: flex;
+                    align-items: center;
+                    min-height: 38px;
+                    padding: 8px 12px;
+                    border-radius: 10px;
+                    color: #3f4448;
+                    font-size: .9rem;
+                    font-weight: 400;
+                    white-space: nowrap;
+                }
+
+                    .home-landing .hero-filter-menu .dropdown-item:hover,
+                    .home-landing .hero-filter-menu .dropdown-item:focus,
+                    .home-landing .hero-filter-menu .dropdown-item.active {
+                        background: #f1f3f5;
+                        color: #1f2327;
+                    }
+
+            .home-landing .hero-quick-links {
+                display: none;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 14px;
+            }
+
+                .home-landing .hero-quick-links a {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 8px 14px;
+                    border-radius: 999px;
+                    background: rgba(255, 255, 255, .08);
+                    border: 1px solid rgba(255, 255, 255, .12);
+                    color: #ffffff;
+                    font-size: 13px;
+                    font-weight: 500;
+                    text-decoration: none;
+                }
+
+                    .home-landing .hero-quick-links a:hover {
+                        background: rgba(40, 199, 244, .16);
+                    }
+
+            .home-landing .hero-side {
+                padding-left: 24px;
+            }
+
+            .home-landing .hero-surface {
+                padding: 28px;
+                border-radius: 28px;
+                background: rgba(255, 255, 255, .06);
+                border: 1px solid rgba(255, 255, 255, .12);
+                box-shadow: 0 26px 70px rgba(6, 29, 39, .18);
+                backdrop-filter: blur(6px);
+            }
+
+            .home-landing .hero-surface-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 20px;
+                margin-bottom: 24px;
+            }
+
+                .home-landing .hero-surface-header span {
+                    display: block;
+                    margin-bottom: 8px;
+                    color: #9edbf0;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: .1em;
+                    text-transform: uppercase;
+                }
+
+                .home-landing .hero-surface-header h3 {
+                    margin: 0;
+                    color: #ffffff;
+                    font-size: 1.6rem;
+                    font-weight: 700;
+                    line-height: 1.35;
+                }
+
+            .home-landing .hero-surface-chip {
+                display: inline-flex;
+                align-items: center;
+                padding: 10px 14px;
+                border-radius: 999px;
+                background: rgba(255, 255, 255, .08);
+                color: #dff7ff;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .home-landing .hero-metric-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
+                margin-bottom: 14px;
+            }
+
+            .home-landing .hero-metric-card {
+                padding: 18px;
+                border-radius: 20px;
+                background: rgba(255, 255, 255, .08);
+                border: 1px solid rgba(255, 255, 255, .08);
+            }
+
+                .home-landing .hero-metric-card strong {
+                    display: block;
+                    margin-bottom: 6px;
+                    color: #ffffff;
+                    font-size: 1.7rem;
+                    font-weight: 800;
+                    letter-spacing: -.04em;
+                }
+
+                .home-landing .hero-metric-card span {
+                    color: rgba(255, 255, 255, .75);
+                    font-size: .95rem;
+                    line-height: 1.5;
+                }
+
+            .home-landing .hero-signal-list {
+                display: none;
+                gap: 12px;
+                margin-top: 18px;
+            }
+
+            .home-landing .hero-signal-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 14px 16px;
+                border-radius: 18px;
+                background: rgba(255, 255, 255, .08);
+            }
+
+                .home-landing .hero-signal-item i {
+                    width: 38px;
+                    height: 38px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 12px;
+                    background: rgba(40, 199, 244, .16);
+                    color: #28c7f4;
+                    font-size: 1rem;
+                }
+
+                .home-landing .hero-signal-item div {
+                    color: #ffffff;
+                    font-size: .96rem;
+                    font-weight: 600;
+                }
+
+            .home-landing .hero-signal-item small {
+                    display: block;
+                    margin-top: 2px;
+                    color: rgba(255, 255, 255, .68);
+                    font-size: .82rem;
+                    font-weight: 400;
+                }
+
+            .home-landing .section-block {
+                padding: 66px 0;
+            }
+
+            .home-landing .section-soft {
+                background: #f4f7fa;
+            }
+
+            .home-landing .section-white {
+                background: #ffffff;
+            }
+
+            .home-landing .section-heading-row {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 20px;
+                margin-bottom: 28px;
+            }
+
+            .home-landing .section-label {
+                display: inline-block;
+                margin-bottom: 10px;
+                color: #30363d;
+                font-size: 12px;
+                font-weight: 800;
+                letter-spacing: .12em;
+                text-transform: uppercase;
+            }
+
+            .home-landing .section-heading {
+                margin: 0 0 10px;
+                color: #082330;
+                font-size: clamp(2rem, 3vw, 2.9rem);
+                font-weight: 800;
+                letter-spacing: -.04em;
+            }
+
+            .home-landing .section-summary {
+                max-width: 620px;
+                margin: 0;
+                color: #617784;
+                line-height: 1.65;
+            }
+
+            .home-landing .section-link {
+                color: #111827;
+                font-weight: 700;
+                text-decoration: underline;
+                text-underline-offset: 4px;
+                white-space: nowrap;
+            }
+
+                .home-landing .section-link:hover {
+                    color: #4b5563;
+                }
+
+            .home-landing #viec-lam-tot-nhat .section-heading-row {
+                align-items: center;
+                margin-bottom: 18px;
+            }
+
+            .home-landing #viec-lam-tot-nhat .section-label {
+                margin-bottom: 6px;
+                color: #687b86;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .08em;
+            }
+
+            .home-landing #viec-lam-tot-nhat .section-heading {
+                margin-bottom: 10px;
+                font-size: clamp(2rem, 3vw, 2.9rem);
+                letter-spacing: -.035em;
+            }
+
+            .home-landing #viec-lam-tot-nhat .section-summary {
+                color: #667984;
+                font-size: .92rem;
+            }
+
+            .home-landing #viec-lam-tot-nhat .section-link {
+                font-size: .9rem;
+            }
+
+            .home-landing .job-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px 14px;
+            }
+
+            .home-landing .featured-job-card {
+                height: 100%;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                padding: 12px;
+                border-radius: 9px;
+                background: #ffffff;
+                border: 1px solid #e1e8ed;
+                box-shadow: none;
+                transition: transform .14s ease, border-color .14s ease, background .14s ease;
+            }
+
+                .home-landing .featured-job-card:hover {
+                    transform: translateY(-1px);
+                    border-color: #cfd6dc;
+                    background: #fbfdfe;
+                }
+
+            .home-landing .job-card-top {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                min-width: 0;
+                margin-bottom: 0;
+            }
+
+            .home-landing .job-card-logo {
+                width: 52px;
+                height: 52px;
+                flex: 0 0 52px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                background: #ffffff;
+                border: 1px solid #e3ebf0;
+                overflow: hidden;
+            }
+
+                .home-landing .job-card-logo img {
+                    width: 116%;
+                    height: 116%;
+                    object-fit: contain;
+                    background: #ffffff;
+                }
+
+                .home-landing .job-card-logo.is-new-logo img {
+                    width: 128%;
+                    height: 128%;
+                    transform: scale(1.08);
+                }
+
+            .home-landing .job-card-logo-fallback {
+                color: #111827;
+                font-size: 1rem;
+                font-weight: 800;
+            }
+
+            .home-landing .job-card-main {
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+
+                .home-landing .job-card-main h3 {
+                    display: -webkit-box;
+                    margin: 0 0 2px;
+                    overflow: hidden;
+                    color: #102331;
+                    font-size: .86rem;
+                    font-weight: 800;
+                    line-height: 1.24;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 2;
+                }
+
+                .home-landing .job-card-main h3 a {
+                    color: inherit;
+                    text-decoration: none;
+                }
+
+                    .home-landing .job-card-main h3 a:hover {
+                        color: #111827;
+                        text-decoration: underline;
+                        text-underline-offset: 3px;
+                    }
+
+                .home-landing .job-card-company {
+                    display: block;
+                    overflow: hidden;
+                    color: #657883;
+                    font-size: .73rem;
+                    font-weight: 500;
+                    text-decoration: none;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                    .home-landing .job-card-company:hover {
+                        color: #111827;
+                        text-decoration: underline;
+                        text-underline-offset: 3px;
+                    }
+
+            .home-landing .job-meta-list {
+                display: flex;
+                flex-wrap: nowrap;
+                gap: 5px;
+                min-width: 0;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+
+            .home-landing .job-meta-pill {
+                display: inline-flex;
+                align-items: center;
+                min-height: 22px;
+                max-width: 100%;
+                padding: 4px 7px;
+                border-radius: 5px;
+                background: #f6f8fa;
+                color: #5f7078;
+                font-size: .68rem;
+                font-weight: 600;
+                line-height: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .home-landing .job-card-bottom {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                margin-left: 56px;
+                padding-top: 0;
+                border-top: 0;
+            }
+
+            .home-landing .job-card-salary {
+                color: #4f636e;
+                font-size: .68rem;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+
+            .home-landing .job-card-deadline {
+                display: none;
+                margin-top: 3px;
+                color: #7b8d96;
+                font-size: .66rem;
+                white-space: nowrap;
+            }
+
+            .home-landing .job-card-button {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                border-radius: 0;
+                background: transparent;
+                color: #111827;
+                font-size: .7rem;
+                font-weight: 700;
+                text-decoration: none;
+                white-space: nowrap;
+            }
+
+                .home-landing .job-card-button:hover {
+                    background: transparent;
+                    color: #4b5563;
+                    text-decoration: underline;
+                }
+
+            .home-landing .featured-job-card.is-hidden {
+                display: none;
+            }
+
+            .home-landing .job-pager {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 15px;
+            }
+
+            .home-landing .job-pager-button {
+                width: 26px;
+                height: 26px;
+                border: 1px solid #d9e3e9;
+                border-radius: 50%;
+                background: transparent;
+                color: #58707b;
+                font-size: .86rem;
+                font-weight: 700;
+                line-height: 1;
+            }
+
+                .home-landing .job-pager-button:hover,
+                .home-landing .job-pager-button:focus {
+                    border-color: #9ca3af;
+                    color: #111827;
+                }
+
+                .home-landing .job-pager-button.is-active {
+                    border-color: #111827;
+                    background: #111827;
+                    color: #ffffff;
+                }
+
+                .home-landing .job-pager-button:disabled {
+                    cursor: not-allowed;
+                    opacity: .45;
+                }
+
+            .home-landing .job-pager-dot {
+                width: 7px;
+                height: 7px;
+                padding: 0;
+                border: 0;
+                border-radius: 999px;
+                background: #c8d3da;
+                line-height: 1;
+                transition: width .16s ease, background .16s ease;
+            }
+
+                .home-landing .job-pager-dot.is-active {
+                    width: 18px;
+                    background: #111827;
+                }
+
+            .home-landing .employer-carousel {
+                position: relative;
+                margin-top: 28px;
+                margin-bottom: 20px;
+                padding: 0 42px 4px;
+            }
+
+            .home-landing .employer-carousel-viewport {
+                overflow: hidden;
+                padding-top: 40px;
+            }
+
+            .home-landing .employer-grid {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 0;
+                transition: transform .24s ease;
+                will-change: transform;
+            }
+
+            .home-landing .employer-carousel-button {
+                position: absolute;
+                top: calc(50% + 20px);
+                z-index: 2;
+                width: 30px;
+                height: 42px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #d9e1e7;
+                border-radius: 10px;
+                background: #ffffff;
+                color: #111827;
+                font-size: 1rem;
+                line-height: 1;
+                transform: translateY(-50%);
+                transition: border-color .16s ease, background .16s ease, color .16s ease;
+            }
+
+                .home-landing .employer-carousel-button:hover,
+                .home-landing .employer-carousel-button:focus {
+                    border-color: #aeb8c2;
+                    background: #f5f6f8;
+                    color: #000000;
+                }
+
+                .home-landing .employer-carousel-button:disabled {
+                    cursor: not-allowed;
+                    opacity: .35;
+                }
+
+                .home-landing .employer-carousel-button.is-prev {
+                    left: 0;
+                }
+
+                .home-landing .employer-carousel-button.is-next {
+                    right: 0;
+                }
+
+            .home-landing .employer-card {
+                position: relative;
+                min-height: 152px;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                padding: 52px 18px 18px;
+                border-radius: 10px;
+                background: #fbfefd;
+                border: 1px solid #e3eee8;
+                box-shadow: none;
+                overflow: visible;
+                text-decoration: none;
+                transition: transform .18s ease, border-color .18s ease, background .18s ease;
+                flex: 0 0 calc((100% - 60px) / 4);
+            }
+
+                .home-landing .employer-card:hover {
+                    transform: translateY(-2px);
+                    border-color: #ccdcd3;
+                    background: #ffffff;
+                }
+
+            .home-landing .employer-logo {
+                position: absolute;
+                top: -36px;
+                left: 50%;
+                width: 74px;
+                height: 74px;
+                flex: 0 0 74px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                background: #ffffff;
+                border: 1px solid #e2e8ee;
+                box-shadow: 0 8px 20px rgba(17, 24, 39, .06);
+                overflow: hidden;
+                transform: translateX(-50%);
+            }
+
+                .home-landing .employer-logo img {
+                    width: 118%;
+                    height: 118%;
+                    object-fit: contain;
+                    background: #ffffff;
+                }
+
+                .home-landing .employer-logo.is-new-logo img {
+                    width: 132%;
+                    height: 132%;
+                    transform: scale(1.08);
+                }
+
+            .home-landing .employer-logo-fallback {
+                color: #111827;
+                font-size: 1.2rem;
+                font-weight: 800;
+            }
+
+            .home-landing .employer-card h3 {
+                margin: 0;
+                overflow: hidden;
+                color: #111827;
+                font-size: .96rem;
+                font-weight: 700;
+                line-height: 1.38;
+                text-align: center;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+
+            .home-landing .employer-count-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 30px;
+                padding: 7px 13px;
+                border-radius: 7px;
+                background: #eef3fb;
+                color: #2b5fae;
+                font-size: .86rem;
+                font-weight: 600;
+                line-height: 1;
+            }
+
+            .home-landing .employer-logo-strip {
+                position: relative;
+                overflow: hidden;
+                margin-top: 18px;
+                padding: 2px 0;
+            }
+
+                .home-landing .employer-logo-strip::before,
+                .home-landing .employer-logo-strip::after {
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    z-index: 2;
+                    width: 80px;
+                    content: "";
+                    pointer-events: none;
+                }
+
+                .home-landing .employer-logo-strip::before {
+                    left: 0;
+                    background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+                }
+
+                .home-landing .employer-logo-strip::after {
+                    right: 0;
+                    background: linear-gradient(270deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+                }
+
+            .home-landing .employer-logo-track {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: max-content;
+                animation: employerLogoStripDrift 54s linear infinite;
+                will-change: transform;
+            }
+
+            .home-landing .employer-logo-strip:hover .employer-logo-track {
+                animation-play-state: paused;
+            }
+
+            .home-landing .employer-logo-chip {
+                width: 194px;
+                height: 92px;
+                flex: 0 0 auto;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 6px 10px;
+                border-radius: 14px;
+                background: #ffffff;
+                border: 1px solid #e1e9ef;
+                box-shadow: none;
+                overflow: hidden;
+                transition: border-color .16s ease, background .16s ease;
+            }
+
+                .home-landing .employer-logo-chip.is-small {
+                    width: 176px;
+                    height: 86px;
+                }
+
+                .home-landing .employer-logo-chip.is-large {
+                    width: 216px;
+                    height: 98px;
+                }
+
+                .home-landing .employer-logo-chip:hover {
+                    background: #fbfdfe;
+                    border-color: #cbd8df;
+                }
+
+                .home-landing .employer-logo-chip img {
+                    max-width: 142%;
+                    max-height: 98px;
+                    object-fit: contain;
+                    filter: saturate(.98);
+                }
+
+                .home-landing .employer-logo-chip.is-large img {
+                    max-height: 106px;
+                }
+
+                .home-landing .employer-logo-chip.is-mobifone img {
+                    max-width: 105%;
+                    max-height: 72px;
+                }
+
+                .home-landing .employer-logo-chip.is-new-logo img {
+                    max-width: 194%;
+                    max-height: 136px;
+                    transform: scale(1.24);
+                }
+
+            @@keyframes employerLogoStripDrift {
+                from {
+                    transform: translateX(0);
+                }
+
+                to {
+                    transform: translateX(-50%);
+                }
+            }
+
+            .home-landing .category-grid {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 18px;
+            }
+
+            .home-landing .category-card {
+                min-height: 176px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                padding: 26px 20px;
+                border-radius: 12px;
+                background: #f8fafc;
+                border: 1px solid #e6edf2;
+                box-shadow: none;
+                text-decoration: none;
+                text-align: center;
+                transition: border-color .18s ease, background .18s ease, transform .18s ease;
+            }
+
+                .home-landing .category-card:hover {
+                    border-color: #cbd8df;
+                    background: #ffffff;
+                    transform: translateY(-2px);
+                }
+
+            .home-landing .category-icon {
+                width: 72px;
+                height: 72px;
+                flex: 0 0 72px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 18px;
+                background: transparent;
+                color: #1f2933;
+                font-size: 2.25rem;
+            }
+
+            .home-landing .category-card h3 {
+                width: 100%;
+                margin: 0;
+                overflow: hidden;
+                color: #102331;
+                font-size: .98rem;
+                font-weight: 800;
+                line-height: 1.35;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .home-landing .category-card p {
+                margin: 0;
+                color: #4b5563;
+                font-size: .88rem;
+                font-weight: 700;
+                line-height: 1.2;
+            }
+
+            .home-landing .testimonial-section {
+                position: relative;
+                overflow: hidden;
+                background: #ffffff;
+            }
+
+                .home-landing .testimonial-section .section-heading-row {
+                    margin-bottom: 26px;
+                }
+
+                .home-landing .testimonial-section .section-heading {
+                    font-size: clamp(1.55rem, 2.2vw, 2.1rem);
+                }
+
+            .home-landing .testimonial-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 20px;
+            }
+
+            .home-landing .testimonial-card {
+                position: relative;
+                min-height: 260px;
+                display: grid;
+                grid-template-rows: 1fr auto;
+                gap: 28px;
+                padding: 28px 30px;
+                border-radius: 14px;
+                background: #ffffff;
+                border: 1px solid #e5eaee;
+                box-shadow: 0 10px 28px rgba(8, 35, 48, .035);
+                transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+            }
+
+                .home-landing .testimonial-card:hover,
+                .home-landing .testimonial-card:focus-within {
+                    border-color: #cfdbe3;
+                    box-shadow: 0 18px 36px rgba(8, 35, 48, .07);
+                    transform: translateY(-4px);
+                }
+
+                .home-landing .testimonial-card p {
+                    margin: 0;
+                    color: #1f2c35;
+                    font-size: .98rem;
+                    line-height: 1.68;
+                }
+
+            .home-landing .testimonial-person {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 18px;
+            }
+
+            .home-landing .testimonial-person strong {
+                display: block;
+                color: #102331;
+                font-size: .88rem;
+                font-weight: 800;
+                line-height: 1.35;
+            }
+
+            .home-landing .testimonial-person span {
+                display: block;
+                margin-top: 4px;
+                color: #8a969e;
+                font-size: .78rem;
+                font-weight: 600;
+            }
+
+            .home-landing .testimonial-avatar {
+                width: 58px;
+                height: 58px;
+                flex: 0 0 58px;
+                border-radius: 50%;
+                object-fit: cover;
+                background: #eef3f6;
+            }
+
+            .home-landing .public-nav-links .nav-link::after {
+                display: none;
+            }
+
+            .home-landing .btn-nav-register {
+                background: #f8fafc;
+                border-color: #f8fafc;
+                color: #142632 !important;
+                box-shadow: none;
+            }
+
+                .home-landing .btn-nav-register:hover,
+                .home-landing .btn-nav-register:focus {
+                    background: #eaf4f8;
+                    border-color: #d8eaf1;
+                    color: #102331 !important;
+                }
+
+            .home-landing .btn-nav-login:hover,
+            .home-landing .btn-nav-account:hover,
+            .home-landing .btn-nav-login:focus,
+            .home-landing .btn-nav-account:focus {
+                transform: none;
+            }
+
+        @@media (max-width: 1199.98px) {
+            .home-landing .hero-copy h1 {
+                font-size: clamp(2.5rem, 4vw, 4rem);
+            }
+
+            .home-landing .hero-search-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .home-landing .hero-search-button {
+                grid-column: span 2;
+            }
+
+            .home-landing .job-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .home-landing .employer-card {
+                flex-basis: calc((100% - 20px) / 2);
+            }
+
+            .home-landing .testimonial-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .home-landing .employer-logo-chip {
+                width: 166px;
+                height: 80px;
+            }
+
+            .home-landing .employer-logo-chip.is-small {
+                width: 152px;
+                height: 76px;
+            }
+
+            .home-landing .employer-logo-chip.is-large {
+                width: 184px;
+                height: 84px;
+            }
+
+            .home-landing .category-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 991.98px) {
+            .home-landing .public-navbar {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .home-landing .home-hero {
+                min-height: 423px;
+                padding-top: 74px;
+                padding-bottom: 82px;
+            }
+
+            .home-landing .hero-side {
+                padding-left: 0;
+                margin-top: 18px;
+            }
+
+            .home-landing .section-block {
+                padding: 68px 0;
+            }
+        }
+
+        @@media (max-width: 767.98px) {
+            .home-landing .home-hero {
+                min-height: 387px;
+                padding-top: 62px;
+                padding-bottom: 70px;
+            }
+
+            .home-landing .hero-copy h1 {
+                font-size: 2.4rem;
+                white-space: normal;
+            }
+
+            .home-landing .hero-copy p {
+                font-size: 1rem;
+            }
+
+            .home-landing .hero-search-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .home-landing .hero-search-button {
+                grid-column: auto;
+            }
+
+            .home-landing .section-heading-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .home-landing .job-grid,
+            .home-landing .testimonial-grid,
+            .home-landing .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .home-landing .employer-carousel {
+                padding: 0 28px;
+            }
+
+            .home-landing .employer-card {
+                flex-basis: 100%;
+            }
+
+            .home-landing .testimonial-card {
+                min-height: 230px;
+                padding: 24px;
+            }
+
+            .home-landing .employer-logo-strip::before,
+            .home-landing .employer-logo-strip::after {
+                width: 40px;
+            }
+
+            .home-landing .employer-logo-track {
+                gap: 8px;
+                animation-duration: 46s;
+            }
+
+            .home-landing .employer-logo-chip,
+            .home-landing .employer-logo-chip.is-large {
+                width: 148px;
+                height: 72px;
+                padding: 5px 8px;
+                border-radius: 12px;
+            }
+
+            .home-landing .employer-logo-chip.is-small {
+                width: 138px;
+                height: 68px;
+            }
+
+            .home-landing .employer-logo-chip img,
+            .home-landing .employer-logo-chip.is-large img {
+                max-width: 138%;
+                max-height: 76px;
+            }
+
+            .home-landing .employer-logo-chip.is-mobifone img {
+                max-width: 104%;
+                max-height: 58px;
+            }
+
+            .home-landing .employer-logo-chip.is-new-logo img {
+                max-width: 176%;
+                max-height: 104px;
+                transform: scale(1.18);
+            }
+
+            .home-landing .job-card-bottom {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .home-landing .job-card-button {
+                width: auto;
+            }
+
+            .home-landing .featured-job-card {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .home-landing .job-card-bottom {
+                align-items: flex-start;
+                flex-direction: row;
+                margin-left: 0;
+                padding-top: 0;
+                border-top: 0;
+            }
+
+            .home-landing .job-meta-list {
+                margin-top: 0;
+            }
+        }
+    </style>
+}
+
+<section class="home-hero">
     <div class="container">
-        <div class="row fullscreen d-flex align-items-center justify-content-center">
-            <div class="banner-content col-lg-12">
-                <h1 class="text-white">
-                    <span>1500+</span> Jobs posted last week
-                </h1>
-                <form action="search.html" class="serach-form-area">
-                    <div class="row justify-content-center form-wrap">
-                        <div class="col-lg-4 form-cols">
-                            <input type="text" class="form-control" name="search" placeholder="what are you looging for?">
-                        </div>
-                        <div class="col-lg-3 form-cols">
-                            <div class="default-select" id="default-selects" ">
-                                <select>
-                                    <option value="1">Select area</option>
-                                    <option value="2">Dhaka</option>
-                                    <option value="3">Rajshahi</option>
-                                    <option value="4">Barishal</option>
-                                    <option value="5">Noakhali</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 form-cols">
-                            <div class="default-select" id="default-selects2">
-                                <select>
-                                    <option value="1">All Category</option>
-                                    <option value="2">Medical</option>
-                                    <option value="3">Technology</option>
-                                    <option value="4">Goverment</option>
-                                    <option value="5">Development</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-lg-2 form-cols">
-                            <button type="button" class="btn btn-info">
-                                <span class="lnr lnr-magnifier"></span> Search
-                            </button>
-                        </div>
-                    </div>
-                </form>
-                <p class="text-white"> <span>Search by tags:</span> Tecnology, Business, Consulting, IT Company, Design, Development</p>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- End banner Area -->
-<!-- Start features Area -->
-<section class="features-area">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 col-md-6">
-                <div class="single-feature">
-                    <h4>Searching</h4>
+        <div class="row g-5 hero-grid">
+            <div class="col-lg-6">
+                <div class="hero-copy">
+                    <h1>Khám phá công việc dành cho bạn</h1>
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing.
+                        Mọi ngành nghề. Mọi địa điểm. Mọi cấp độ kinh nghiệm.
                     </p>
+
+                    <div class="hero-search-panel">
+                        @using (Html.BeginForm("Index", "Job", FormMethod.Get))
+                        {
+                            <div class="hero-search-grid">
+                                <div class="hero-search-field">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" name="keyword" class="form-control" placeholder="Từ khóa công việc" value="@Model.Keyword" />
+                                </div>
+                                <div class="hero-search-field">
+                                    <i class="bi bi-list"></i>
+                                    <input type="hidden" name="nganhNgheId" id="homeIndustryId" />
+                                    <div class="dropdown hero-search-dropdown w-100">
+                                        <button class="btn dropdown-toggle hero-filter-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-default-label="Ngành nghề">
+                                            <span>Ngành nghề</span>
+                                        </button>
+                                        <div class="dropdown-menu hero-filter-menu">
+                                            <button class="dropdown-item active" type="button" data-target="homeIndustryId" data-value="" data-label="Ngành nghề">Tất cả ngành nghề</button>
+                                            @foreach (var option in Model.NganhNgheOptions)
+                                            {
+                                                <button class="dropdown-item" type="button" data-target="homeIndustryId" data-value="@option.Value" data-label="@option.Text">@option.Text</button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hero-search-field">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <input type="hidden" name="diaDiemId" id="homeLocationId" />
+                                    <div class="dropdown hero-search-dropdown w-100">
+                                        <button class="btn dropdown-toggle hero-filter-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-default-label="Địa điểm">
+                                            <span>Địa điểm</span>
+                                        </button>
+                                        <div class="dropdown-menu hero-filter-menu">
+                                            <button class="dropdown-item active" type="button" data-target="homeLocationId" data-value="" data-label="Địa điểm">Tất cả địa điểm</button>
+                                            @foreach (var option in Model.DiaDiemOptions)
+                                            {
+                                                <button class="dropdown-item" type="button" data-target="homeLocationId" data-value="@option.Value" data-label="@option.Text">@option.Text</button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="hero-search-button">Tìm kiếm</button>
+                            </div>
+                        }
+
+                        @if (quickCategories.Any())
+                        {
+                            <div class="hero-quick-links">
+                                @foreach (var category in quickCategories)
+                                {
+                                    <a href="@Url.Action("Index", "Job", new { nganhNgheId = category.NganhNgheId })">@category.TenNganhNghe</a>
+                                }
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="single-feature">
-                    <h4>Applying</h4>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="single-feature">
-                    <h4>Security</h4>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing.
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="single-feature">
-                    <h4>Notifications</h4>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- End features Area -->
-<!-- Start popular-post Area -->
-<section class="popular-post-area pt-100">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="active-popular-post-carusel">
-                <div class="single-popular-post d-flex flex-row">
-                    <div class="thumb">
-                        <img class="img-fluid" src="~/Content/img/p1.png" alt="">
-                        <a class="btns text-uppercase" href="#">view job post</a>
-                    </div>
-                    <div class="details">
-                        <a href="#"><h4>Creative Designer</h4></a>
-                        <h6>Los Angeles</h6>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.
-                        </p>
-                    </div>
-                </div>
-                <div class="single-popular-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/p2.png" alt="">
-                        <a class="btns text-uppercase" href="#">view job post</a>
-                    </div>
-                    <div class="details">
-                        <a href="#"><h4>Creative Designer</h4></a>
-                        <h6>Los Angeles</h6>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.
-                        </p>
-                    </div>
-                </div>
-                <div class="single-popular-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/p1.png" alt="">
-                        <a class="btns text-uppercase" href="#">view job post</a>
-                    </div>
-                    <div class="details">
-                        <a href="#"><h4>Creative Designer</h4></a>
-                        <h6>Los Angeles</h6>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.
-                        </p>
-                    </div>
-                </div>
-                <div class="single-popular-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/p2.png" alt="">
-                        <a class="btns text-uppercase" href="#">view job post</a>
-                    </div>
-                    <div class="details">
-                        <a href="#"><h4>Creative Designer</h4></a>
-                        <h6>Los Angeles</h6>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.
-                        </p>
-                    </div>
-                </div>
-                <div class="single-popular-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/p1.png" alt="">
-                        <a class="btns text-uppercase" href="#">view job post</a>
-                    </div>
-                    <div class="details">
-                        <a href="#"><h4>Creative Designer</h4></a>
-                        <h6>Los Angeles</h6>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.
-                        </p>
-                    </div>
-                </div>
-                <div class="single-popular-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/p2.png" alt="">
-                        <a class="btns text-uppercase" href="#">view job post</a>
-                    </div>
-                    <div class="details">
-                        <a href="#"><h4>Creative Designer</h4></a>
-                        <h6>Los Angeles</h6>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis.
-                        </p>
+
+            <div class="col-lg-6">
+                <div class="hero-side">
+                    <div class="hero-surface">
+                        <div class="hero-surface-header">
+                            <div>
+                                <span>Tổng quan</span>
+                                <h3>Dữ liệu cần thiết, không rối mắt.</h3>
+                            </div>
+                            <span class="hero-surface-chip">Đang mở</span>
+                        </div>
+
+                        <div class="hero-metric-grid">
+                            <div class="hero-metric-card">
+                                <strong>@featuredJobs.Count</strong>
+                                <span>Việc nổi bật</span>
+                            </div>
+                            <div class="hero-metric-card">
+                                <strong>@featuredCategories.Count</strong>
+                                <span>Ngành đang tuyển</span>
+                            </div>
+                        </div>
+
+                        <div class="hero-signal-list">
+                            <div class="hero-signal-item">
+                                <i class="bi bi-patch-check"></i>
+                                <div>
+                                    Tin đã duyệt
+                                    <small>Chỉ ưu tiên những cơ hội còn hạn và đủ dữ liệu</small>
+                                </div>
+                            </div>
+                            <div class="hero-signal-item">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <div>
+                                    CV tập trung
+                                    <small>Quản lý hồ sơ cá nhân và nộp đơn trong cùng một luồng</small>
+                                </div>
+                            </div>
+                            <div class="hero-signal-item">
+                                <i class="bi bi-diagram-3"></i>
+                                <div>
+                                    Theo dõi phản hồi
+                                    <small>Biết trạng thái từng đơn ứng tuyển thay vì gửi đi rồi mất dấu</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
-<!-- End popular-post Area -->
-<!-- Start feature-cat Area -->
-<section class="feature-cat-area pt-100" id="category">
+
+@section scripts {
+    <script>
+        (function () {
+            document.querySelectorAll(".hero-filter-menu .dropdown-item").forEach(function (item) {
+                item.addEventListener("click", function () {
+                    var targetId = item.getAttribute("data-target");
+                    var target = document.getElementById(targetId);
+                    var dropdown = item.closest(".hero-search-dropdown");
+                    var label = item.getAttribute("data-label") || item.textContent.trim();
+
+                    if (target) {
+                        target.value = item.getAttribute("data-value") || "";
+                    }
+
+                    if (dropdown) {
+                        var buttonLabel = dropdown.querySelector(".hero-filter-toggle span");
+                        var toggle = dropdown.querySelector(".hero-filter-toggle");
+                        var value = item.getAttribute("data-value") || "";
+                        if (buttonLabel) {
+                            buttonLabel.textContent = label;
+                        }
+
+                        if (toggle) {
+                            toggle.classList.toggle("has-value", value.length > 0);
+                        }
+
+                        dropdown.querySelectorAll(".dropdown-item").forEach(function (option) {
+                            option.classList.remove("active");
+                        });
+                    }
+
+                    item.classList.add("active");
+                });
+            });
+
+            var jobCards = Array.prototype.slice.call(document.querySelectorAll("[data-job-page]"));
+            var pager = document.querySelector("[data-job-pager]");
+            var prevButton = document.querySelector("[data-job-prev]");
+            var nextButton = document.querySelector("[data-job-next]");
+            var pageButtons = Array.prototype.slice.call(document.querySelectorAll("[data-job-page-button]"));
+            var activePage = 1;
+
+            function showJobPage(page) {
+                activePage = page;
+
+                jobCards.forEach(function (card) {
+                    card.classList.toggle("is-hidden", parseInt(card.getAttribute("data-job-page"), 10) !== activePage);
+                });
+
+                pageButtons.forEach(function (button) {
+                    button.classList.toggle("is-active", parseInt(button.getAttribute("data-job-page-button"), 10) === activePage);
+                });
+
+                if (prevButton) {
+                    prevButton.disabled = activePage === 1;
+                }
+
+                if (nextButton) {
+                    nextButton.disabled = activePage === pageButtons.length;
+                }
+            }
+
+            if (pager && pageButtons.length > 0) {
+                pageButtons.forEach(function (button) {
+                    button.addEventListener("click", function () {
+                        showJobPage(parseInt(button.getAttribute("data-job-page-button"), 10));
+                    });
+                });
+
+                if (prevButton) {
+                    prevButton.addEventListener("click", function () {
+                        if (activePage > 1) {
+                            showJobPage(activePage - 1);
+                        }
+                    });
+                }
+
+                if (nextButton) {
+                    nextButton.addEventListener("click", function () {
+                        if (activePage < pageButtons.length) {
+                            showJobPage(activePage + 1);
+                        }
+                    });
+                }
+
+                showJobPage(1);
+            }
+
+            var employerCarousel = document.querySelector("[data-employer-carousel]");
+            if (employerCarousel) {
+                var employerViewport = employerCarousel.querySelector("[data-employer-viewport]");
+                var employerTrack = employerCarousel.querySelector("[data-employer-track]");
+                var employerCards = Array.prototype.slice.call(employerCarousel.querySelectorAll("[data-employer-card]"));
+                var employerPrev = employerCarousel.querySelector("[data-employer-prev]");
+                var employerNext = employerCarousel.querySelector("[data-employer-next]");
+                var employerPage = 0;
+
+                function getEmployerPerPage() {
+                    if (window.innerWidth < 768) {
+                        return 1;
+                    }
+
+                    if (window.innerWidth < 1200) {
+                        return 2;
+                    }
+
+                    return 4;
+                }
+
+                function updateEmployerCarousel() {
+                    if (!employerViewport || !employerTrack || employerCards.length === 0) {
+                        return;
+                    }
+
+                    var perPage = getEmployerPerPage();
+                    var maxPage = Math.max(0, Math.ceil(employerCards.length / perPage) - 1);
+                    employerPage = Math.min(employerPage, maxPage);
+
+                    var trackStyle = window.getComputedStyle(employerTrack);
+                    var gap = parseFloat(trackStyle.columnGap || trackStyle.gap || "0") || 0;
+                    var offset = employerPage * (employerViewport.clientWidth + gap);
+                    employerTrack.style.transform = "translateX(-" + offset + "px)";
+
+                    if (employerPrev) {
+                        employerPrev.disabled = employerPage <= 0;
+                    }
+
+                    if (employerNext) {
+                        employerNext.disabled = employerPage >= maxPage;
+                    }
+                }
+
+                if (employerPrev) {
+                    employerPrev.addEventListener("click", function () {
+                        employerPage = Math.max(0, employerPage - 1);
+                        updateEmployerCarousel();
+                    });
+                }
+
+                if (employerNext) {
+                    employerNext.addEventListener("click", function () {
+                        employerPage += 1;
+                        updateEmployerCarousel();
+                    });
+                }
+
+                window.addEventListener("resize", updateEmployerCarousel);
+                updateEmployerCarousel();
+            }
+
+        })();
+    </script>
+}
+
+<section class="section-block section-soft" id="viec-lam-tot-nhat">
     <div class="container">
-        <div class="row d-flex justify-content-center">
-            <div class="menu-content pb-60 col-lg-10">
-                <div class="title text-center">
-                    <h1 class="mb-10">Featured Job Categories</h1>
-                    <p>Who are in extremely love with eco friendly system.</p>
-                </div>
+        <div class="section-heading-row">
+            <div>
+                <span class="section-label">Gợi ý cho bạn</span>
+                <h2 class="section-heading">Việc làm tốt nhất</h2>
+                <p class="section-summary">Những tin đã duyệt, còn hạn và có thông tin rõ ràng.</p>
             </div>
+            <a href="@Url.Action("Index", "Job")" class="section-link">Xem tất cả việc làm</a>
         </div>
-        <div class="row">
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <div class="single-fcat">
-                    <a href="category.html">
-                        <img src="~/Content/img/o1.png" alt="">
-                    </a>
-                    <p>Accounting</p>
-                </div>
+
+        @if (featuredJobs.Any())
+        {
+            <div class="job-grid">
+                @for (var i = 0; i < featuredJobs.Count; i++)
+                {
+                    var job = featuredJobs[i];
+                    var page = (i / jobsPerPage) + 1;
+                    var jobLogoKey = (job.LogoCongTy ?? string.Empty).ToLowerInvariant();
+                    var jobLogoClass = jobLogoKey.Contains("techcombank2") || jobLogoKey.Contains("yamaha2") || jobLogoKey.Contains("honda2") ? "is-new-logo" : string.Empty;
+                    <article class="featured-job-card @(page > 1 ? "is-hidden" : string.Empty)" data-job-page="@page">
+                        <div class="job-card-top">
+                            <div class="job-card-logo @jobLogoClass">
+                                @if (!string.IsNullOrWhiteSpace(job.LogoCongTy))
+                                {
+                                    <img src="@Url.Content(job.LogoCongTy)" alt="@job.TenCongTy" />
+                                }
+                                else
+                                {
+                                    <span class="job-card-logo-fallback">@job.TenCongTy.Substring(0, 1).ToUpper()</span>
+                                }
+                            </div>
+                            <div class="job-card-main">
+                                <h3>
+                                    <a href="@Url.Action("Details", "Job", new { id = job.TinTuyenDungId })">@job.TieuDe</a>
+                                </h3>
+                                @if (job.HoSoCongTyId.HasValue)
+                                {
+                                    <a class="job-card-company" href="@Url.Action("Company", "Job", new { id = job.HoSoCongTyId.Value })">@job.TenCongTy</a>
+                                }
+                                else
+                                {
+                                    <span class="job-card-company">@job.TenCongTy</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="job-card-bottom">
+                            <div class="job-meta-list">
+                                <span class="job-meta-pill">@CompactSalary(job.LuongHienThi)</span>
+                                <span class="job-meta-pill">@job.TenDiaDiem</span>
+                            </div>
+                            <a href="@Url.Action("Details", "Job", new { id = job.TinTuyenDungId })" class="job-card-button">Chi tiết</a>
+                        </div>
+                    </article>
+                }
             </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <div class="single-fcat">
-                    <a href="category.html">
-                        <img src="~/Content/img/o2.png" alt="">
-                    </a>
-                    <p>Development</p>
+
+            if (totalJobPages > 1)
+            {
+                <div class="job-pager" data-job-pager>
+                    <button type="button" class="job-pager-button" data-job-prev aria-label="Trang trước">‹</button>
+                    @for (var page = 1; page <= totalJobPages; page++)
+                    {
+                        <button type="button" class="job-pager-dot @(page == 1 ? "is-active" : string.Empty)" data-job-page-button="@page" aria-label="Trang @page"></button>
+                    }
+                    <button type="button" class="job-pager-button" data-job-next aria-label="Trang sau">›</button>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state p-5 text-center">
+                <h5 class="mb-3">Chưa có việc làm công khai</h5>
+                <p class="text-muted mb-0">Khi có tin tuyển dụng đã duyệt, khu vực này sẽ hiển thị ngay các cơ hội nổi bật.</p>
             </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <div class="single-fcat">
-                    <a href="category.html">
-                        <img src="~/Content/img/o3.png" alt="">
-                    </a>
-                    <p>Technology</p>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <div class="single-fcat">
-                    <a href="category.html">
-                        <img src="~/Content//o4.png" alt="">
-                    </a>
-                    <p>Media & News</p>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <div class="single-fcat">
-                    <a href="category.html">
-                        <img src="~/Content/img/o5.png" alt="">
-                    </a>
-                    <p>Medical</p>
-                </div>
-            </div>
-            <div class="col-lg-2 col-md-4 col-sm-6">
-                <div class="single-fcat">
-                    <a href="category.html">
-                        <img src="~/Content/img/o6.png" alt="">
-                    </a>
-                    <p>Goverment</p>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
-<!-- End feature-cat Area -->
-<!-- Start post Area -->
-<section class="post-area section-gap">
+
+<section class="section-block section-white" id="nha-tuyen-dung-tieu-bieu">
     <div class="container">
-        <div class="row justify-content-center d-flex">
-            <div class="col-lg-8 post-list">
-                <ul class="cat-list">
-                    <li><a href="#">Recent</a></li>
-                    <li><a href="#">Full Time</a></li>
-                    <li><a href="#">Intern</a></li>
-                    <li><a href="#">part Time</a></li>
-                </ul>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-                <div class="single-post d-flex flex-row">
-                    <div class="thumb">
-                        <img src="~/Content/img/post.png" alt="">
-                        <ul class="tags">
-                            <li>
-                                <a href="#">Art</a>
-                            </li>
-                            <li>
-                                <a href="#">Media</a>
-                            </li>
-                            <li>
-                                <a href="#">Design</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="details">
-                        <div class="title d-flex flex-row justify-content-between">
-                            <div class="titles">
-                                <a href="single.html"><h4>Creative Art Designer</h4></a>
-                                <h6>Premium Labels Limited</h6>
-                            </div>
-                            <ul class="btns">
-                                <li><a href="#"><span class="lnr lnr-heart"></span></a></li>
-                                <li><a href="#">Apply</a></li>
-                            </ul>
-                        </div>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                        </p>
-                        <h5>Job Nature: Full time</h5>
-                        <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                        <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                    </div>
-                </div>
-
-                <a class="text-uppercase loadmore-btn mx-auto d-block" href="category.html">Load More job Posts</a>
-
+        <div class="section-heading-row">
+            <div>
+                <span class="section-label">Nhà tuyển dụng tiêu biểu</span>
+                <h2 class="section-heading">Doanh nghiệp đang tuyển</h2>
+                <p class="section-summary">Xem nhanh các công ty có nhiều vị trí mở.</p>
             </div>
-            <div class="col-lg-4 sidebar">
-                <div class="single-slidebar">
-                    <h4>Jobs by Location</h4>
-                    <ul class="cat-list">
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>New York</p><span>37</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Park Montana</p><span>57</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Atlanta</p><span>33</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Arizona</p><span>36</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Florida</p><span>47</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Rocky Beach</p><span>27</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Chicago</p><span>17</span></a></li>
-                    </ul>
-                </div>
-
-                <div class="single-slidebar">
-                    <h4>Top rated job posts</h4>
-                    <div class="active-relatedjob-carusel">
-                        <div class="single-rated">
-                            <img class="img-fluid" src="~/Content/img/r1.jpg" alt="">
-                            <a href="single.html"><h4>Creative Art Designer</h4></a>
-                            <h6>Premium Labels Limited</h6>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                            </p>
-                            <h5>Job Nature: Full time</h5>
-                            <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                            <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                            <a href="#" class="btns text-uppercase">Apply job</a>
-                        </div>
-                        <div class="single-rated">
-                            <img class="img-fluid" src="~/Content/img/r1.jpg" alt="">
-                            <a href="single.html"><h4>Creative Art Designer</h4></a>
-                            <h6>Premium Labels Limited</h6>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                            </p>
-                            <h5>Job Nature: Full time</h5>
-                            <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                            <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                            <a href="#" class="btns text-uppercase">Apply job</a>
-                        </div>
-                        <div class="single-rated">
-                            <img class="img-fluid" src="~/Content/img/r1.jpg" alt="">
-                            <a href="single.html"><h4>Creative Art Designer</h4></a>
-                            <h6>Premium Labels Limited</h6>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod temporinc ididunt ut dolore magna aliqua.
-                            </p>
-                            <h5>Job Nature: Full time</h5>
-                            <p class="address"><span class="lnr lnr-map"></span> 56/8, Panthapath Dhanmondi Dhaka</p>
-                            <p class="address"><span class="lnr lnr-database"></span> 15k - 25k</p>
-                            <a href="#" class="btns text-uppercase">Apply job</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="single-slidebar">
-                    <h4>Jobs by Category</h4>
-                    <ul class="cat-list">
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Technology</p><span>37</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Media & News</p><span>57</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Goverment</p><span>33</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Medical</p><span>36</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Restaurants</p><span>47</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Developer</p><span>27</span></a></li>
-                        <li><a class="justify-content-between d-flex" href="category.html"><p>Accounting</p><span>17</span></a></li>
-                    </ul>
-                </div>
-
-                <div class="single-slidebar">
-                    <h4>Carrer Advice Blog</h4>
-                    <div class="blog-list">
-                        <div class="single-blog " style="background:#000 url(img/blog1.jpg);">
-                            <a href="single.html">
-                                <h4>
-                                    Home Audio Recording <br>
-                                    For Everyone
-                                </h4>
-                            </a>
-                            <div class="meta justify-content-between d-flex">
-                                <p>
-                                    02 Hours ago
-                                </p>
-                                <p>
-                                    <span class="lnr lnr-heart"></span>
-                                    06
-                                    <span class="lnr lnr-bubble"></span>
-                                    02
-                                </p>
-                            </div>
-                        </div>
-                        <div class="single-blog " style="background:#000 url(img/blog2.jpg);">
-                            <a href="single.html">
-                                <h4>
-                                    Home Audio Recording <br>
-                                    For Everyone
-                                </h4>
-                            </a>
-                            <div class="meta justify-content-between d-flex">
-                                <p>
-                                    02 Hours ago
-                                </p>
-                                <p>
-                                    <span class="lnr lnr-heart"></span>
-                                    06
-                                    <span class="lnr lnr-bubble"></span>
-                                    02
-                                </p>
-                            </div>
-                        </div>
-                        <div class="single-blog " style="background:#000 url(img/blog1.jpg);">
-                            <a href="single.html">
-                                <h4>
-                                    Home Audio Recording <br>
-                                    For Everyone
-                                </h4>
-                            </a>
-                            <div class="meta justify-content-between d-flex">
-                                <p>
-                                    02 Hours ago
-                                </p>
-                                <p>
-                                    <span class="lnr lnr-heart"></span>
-                                    06
-                                    <span class="lnr lnr-bubble"></span>
-                                    02
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+            <a href="@Url.Action("Register", "Account")" class="section-link">Dành cho nhà tuyển dụng</a>
         </div>
+
+        @if (employerCards.Any())
+        {
+            <div class="employer-carousel" data-employer-carousel>
+                <button type="button" class="employer-carousel-button is-prev" data-employer-prev aria-label="Doanh nghiệp trước">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="employer-carousel-viewport" data-employer-viewport>
+                    <div class="employer-grid" data-employer-track>
+                @foreach (var employer in employerCards)
+                {
+                    var employerLogoKey = (employer.LogoCongTy ?? string.Empty).ToLowerInvariant();
+                    var employerLogoClass = employerLogoKey.Contains("techcombank2") || employerLogoKey.Contains("yamaha2") || employerLogoKey.Contains("honda2") ? "is-new-logo" : string.Empty;
+                    <a href="@Url.Action("Company", "Job", new { id = employer.HoSoCongTyId })" class="employer-card" data-employer-card>
+                        <div class="employer-logo @employerLogoClass">
+                            @if (!string.IsNullOrWhiteSpace(employer.LogoCongTy))
+                            {
+                                <img src="@Url.Content(employer.LogoCongTy)" alt="@employer.TenCongTy" />
+                            }
+                            else
+                            {
+                                <span class="employer-logo-fallback">@employer.TenCongTy.Substring(0, 1).ToUpper()</span>
+                            }
+                        </div>
+                        <h3>@employer.TenCongTy</h3>
+                        <span class="employer-count-pill">@employer.SoLuongTinDangTuyen việc đang tuyển</span>
+                    </a>
+                }
+                    </div>
+                </div>
+                <button type="button" class="employer-carousel-button is-next" data-employer-next aria-label="Doanh nghiệp sau">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+
+            if (employerRuntimeLogos.Any())
+            {
+                var employerLogoTrack = employerRuntimeLogos.Concat(employerRuntimeLogos).ToList();
+                var employerLogoSizes = new[] { "is-medium", "is-small", "is-large", "is-medium", "is-small", "is-medium" };
+                <div class="employer-logo-strip">
+                    <div class="employer-logo-track">
+                        @for (var i = 0; i < employerLogoTrack.Count; i++)
+                        {
+                            var logo = employerLogoTrack[i];
+                            var sizeClass = employerLogoSizes[i % employerLogoSizes.Length];
+                            var logoKey = logo.Item1.ToLowerInvariant();
+                            var brandClass = logoKey.Contains("mobifone") ? "is-mobifone" : string.Empty;
+                            var newLogoClass = logoKey.Contains("techcombank2") ? "is-new-logo" : string.Empty;
+                            <div class="employer-logo-chip @sizeClass @brandClass @newLogoClass">
+                                <img src="@logo.Item2" alt="@logo.Item1" loading="lazy" />
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state p-5 text-center">
+                <h5 class="mb-3">Chưa có nhà tuyển dụng tiêu biểu</h5>
+                <p class="text-muted mb-0">Khi có doanh nghiệp sở hữu tin đã duyệt, khu vực này sẽ hiển thị để tăng độ tin cậy cho trang chủ.</p>
+            </div>
+        }
     </div>
 </section>
-<!-- End post Area -->
-<!-- Start callto-action Area -->
-<section class="callto-action-area section-gap" id="join">
+
+<section class="section-block section-soft" id="nganh-nghe-noi-bat">
     <div class="container">
-        <div class="row d-flex justify-content-center">
-            <div class="menu-content col-lg-9">
-                <div class="title text-center">
-                    <h1 class="mb-10 text-white">Join us today without any hesitation</h1>
-                    <p class="text-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore  et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
-                    <a class="primary-btn" href="#">I am a Candidate</a>
-                    <a class="primary-btn" href="#">Request Free Demo</a>
-                </div>
+        <div class="section-heading-row">
+            <div>
+                <span class="section-label">Ngành nghề nổi bật</span>
+                <h2 class="section-heading">Tìm theo ngành</h2>
+                <p class="section-summary">Chọn nhóm ngành để đi thẳng tới danh sách phù hợp.</p>
             </div>
+            <a href="@Url.Action("Index", "Job")" class="section-link">Mở trang việc làm</a>
         </div>
+
+        @if (featuredCategories.Any())
+        {
+            <div class="category-grid">
+                @for (var i = 0; i < featuredCategories.Count; i++)
+                {
+                    var category = featuredCategories[i];
+                    var icon = categoryIcons[i % categoryIcons.Length];
+                    <a href="@Url.Action("Index", "Job", new { nganhNgheId = category.NganhNgheId })" class="category-card">
+                        <span class="category-icon"><i class="bi @icon"></i></span>
+                        <div>
+                            <h3>@category.TenNganhNghe</h3>
+                            <p>@category.SoLuongTin việc làm</p>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state p-5 text-center">
+                <h5 class="mb-3">Chưa có ngành nghề nổi bật</h5>
+                <p class="text-muted mb-0">Khi dữ liệu tuyển dụng phong phú hơn, nhóm ngành nổi bật sẽ tự động hiển thị tại đây.</p>
+            </div>
+        }
     </div>
 </section>
-<!-- End calto-action Area -->
-<!-- Start download Area -->
-<section class="download-area section-gap" id="app">
+
+<section class="section-block testimonial-section">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-6 download-left">
-                <img class="img-fluid" src="~/Content/img/d1.png" alt="">
+        <div class="section-heading-row">
+            <div>
+                <span class="section-label">Trải nghiệm ứng viên</span>
+                <h2 class="section-heading">Ứng viên nói gì về VietJob</h2>
             </div>
-            <div class="col-lg-6 download-right">
-                <h1>
-                    Download the <br>
-                    Job Listing App Today!
-                </h1>
-                <p class="subs">
-                    It won’t be a bigger problem to find one video game lover in your neighbor. Since the introduction of Virtual Game, it has been achieving great heights so far as its popularity and technological advancement are concerned.
-                </p>
-                <div class="d-flex flex-row">
-                    <div class="buttons">
-                        <i class="fa fa-apple" aria-hidden="true"></i>
-                        <div class="desc">
-                            <a href="#">
-                                <p>
-                                    <span>Available</span> <br>
-                                    on App Store
-                                </p>
-                            </a>
+        </div>
+
+        <div class="testimonial-grid">
+            @foreach (var testimonial in testimonials)
+            {
+                <article class="testimonial-card">
+                    <p>“@testimonial.Text”</p>
+                    <div class="testimonial-person">
+                        <div>
+                            <strong>@testimonial.Name</strong>
+                            <span>@testimonial.Company</span>
                         </div>
+                        <img class="testimonial-avatar" src="@Url.Content(testimonial.Avatar)" alt="@testimonial.Name" loading="lazy" />
                     </div>
-                    <div class="buttons">
-                        <i class="fa fa-android" aria-hidden="true"></i>
-                        <div class="desc">
-                            <a href="#">
-                                <p>
-                                    <span>Available</span> <br>
-                                    on Play Store
-                                </p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </article>
+            }
         </div>
     </div>
 </section>

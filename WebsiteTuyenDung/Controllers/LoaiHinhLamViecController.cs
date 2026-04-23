@@ -28,6 +28,7 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(LoaiHinhLamViec model)
         {
+            model = model ?? new LoaiHinhLamViec();
             ValidateTen(model?.TenLoaiHinhLamViec, null);
             if (!ModelState.IsValid)
             {
@@ -61,6 +62,11 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(LoaiHinhLamViec model)
         {
+            if (model == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             ValidateTen(model?.TenLoaiHinhLamViec, model?.LoaiHinhLamViecId);
             if (!ModelState.IsValid)
             {
@@ -115,6 +121,12 @@ namespace WebsiteTuyenDung.Controllers
             }
 
             var normalized = ten.Trim();
+            if (normalized.Length > 100)
+            {
+                ModelState.AddModelError("TenLoaiHinhLamViec", "Tên loại hình làm việc tối đa 100 ký tự.");
+                return;
+            }
+
             var normalizedLower = normalized.ToLower();
             var existed = db.LoaiHinhLamViecs.Any(x =>
                 x.TenLoaiHinhLamViec.ToLower() == normalizedLower

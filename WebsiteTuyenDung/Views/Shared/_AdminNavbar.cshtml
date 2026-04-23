@@ -1,8 +1,8 @@
-﻿@using WebsiteTuyenDung.Models.Constants
+@using WebsiteTuyenDung.Models.Constants
 @{
-    var homeAction = User.IsInRole(ApplicationRoles.Admin) ? "AdminDashboard" : "EmployerDashboard";
-    var homeLabel = User.IsInRole(ApplicationRoles.Admin) ? "Admin" : "Nhà tuyển dụng";
-    var roleLabel = User.IsInRole(ApplicationRoles.Admin) ? "Quản trị viên" : "Nhà tuyển dụng";
+    var isAdmin = User.IsInRole(ApplicationRoles.Admin);
+    var homeAction = isAdmin ? "AdminDashboard" : "EmployerDashboard";
+    var roleLabel = isAdmin ? "Quản trị viên" : "Nhà tuyển dụng";
 }
 
 @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "adminPortalLogoutForm" }))
@@ -11,12 +11,9 @@
 }
 
 <header class="main-header">
-    <a href="@Url.Action(homeAction, "Home")" class="logo">
-        <span class="logo-mini"><b>TD</b></span>
-        <span class="logo-lg">
-            <b>Tuyển dụng</b>
-            <span class="brand-subtitle">@homeLabel</span>
-        </span>
+    <a href="@Url.Action("Index", "Home")" class="logo admin-vietjob-logo">
+        <span class="logo-mini"><b>VJ</b></span>
+        <span class="logo-lg"><b>VietJob</b></span>
     </a>
 
     <nav class="navbar navbar-static-top" role="navigation">
@@ -26,6 +23,26 @@
 
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
+                <li class="dropdown notifications-menu admin-notification-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-label="Thông báo">
+                        <i class="fa fa-bell-o"></i>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="header">Thông báo</li>
+                        <li>
+                            <ul class="menu">
+                                <li>
+                                    <a href="javascript:void(0)">
+                                        <span class="admin-notification-text">Chưa có thông báo mới.</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="footer">
+                            <a href="@Url.Action(homeAction, "Home")">Xem tổng quan</a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <img src="@Url.Content("~/Content/AdminLTE/dist/img/user2-160x160.jpg")" class="user-image" alt="User Image" />

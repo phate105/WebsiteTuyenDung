@@ -8,7 +8,7 @@
 
 <div class="login-box">
     <div class="login-logo">
-        <a href="@Url.Action("Index", "Home")"><b>Viet</b>Job</a>
+        <a href="@Url.Action("Index", "Home")" class="auth-brand-mark"><span>VietJob</span></a>
     </div>
 
     <div class="login-box-body auth-box-body">
@@ -44,7 +44,7 @@
             </div>
 
             <div class="auth-submit">
-                <button type="submit" class="btn btn-primary btn-block btn-flat">Đăng nhập</button>
+                <button type="submit" class="btn btn-success btn-block btn-flat">Đăng nhập</button>
             </div>
         }
 
@@ -81,14 +81,11 @@
                 button.addEventListener("click", function () {
                     if (emailInput) {
                         emailInput.value = button.getAttribute("data-email") || "";
+                        emailInput.focus();
                     }
 
                     if (passwordInput) {
                         passwordInput.value = button.getAttribute("data-password") || "";
-                    }
-
-                    if (emailInput) {
-                        emailInput.focus();
                     }
                 });
             });

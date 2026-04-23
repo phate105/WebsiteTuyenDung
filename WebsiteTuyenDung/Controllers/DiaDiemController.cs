@@ -28,6 +28,7 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(DiaDiem model)
         {
+            model = model ?? new DiaDiem();
             ValidateTen(model?.TenDiaDiem, null);
             if (!ModelState.IsValid)
             {
@@ -61,6 +62,11 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(DiaDiem model)
         {
+            if (model == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             ValidateTen(model?.TenDiaDiem, model?.DiaDiemId);
             if (!ModelState.IsValid)
             {
@@ -115,6 +121,12 @@ namespace WebsiteTuyenDung.Controllers
             }
 
             var normalized = ten.Trim();
+            if (normalized.Length > 100)
+            {
+                ModelState.AddModelError("TenDiaDiem", "Tên địa điểm tối đa 100 ký tự.");
+                return;
+            }
+
             var normalizedLower = normalized.ToLower();
             var existed = db.DiaDiems.Any(x =>
                 x.TenDiaDiem.ToLower() == normalizedLower

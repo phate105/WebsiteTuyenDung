@@ -16,6 +16,7 @@ namespace WebsiteTuyenDung.Controllers
     public class HoSoCongTyController : Controller
     {
         private static readonly string[] AllowedLogoExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+        private static readonly string[] AllowedLogoContentTypes = { "image/jpeg", "image/png", "image/gif", "image/webp" };
         private const int LogoMaxSizeInBytes = 5 * 1024 * 1024;
 
         private readonly ApplicationDbContext db = new ApplicationDbContext();
@@ -41,6 +42,7 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(HoSoCongTyFormViewModel model, HttpPostedFileBase logoFile)
         {
+            model = model ?? new HoSoCongTyFormViewModel();
             if (GetHoSoCongTyHienTai() != null)
             {
                 TempData["ErrorMessage"] = "Tài khoản này đã có hồ sơ công ty.";
@@ -100,6 +102,11 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(HoSoCongTyFormViewModel model, HttpPostedFileBase logoFile)
         {
+            if (model == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             var entity = GetHoSoCongTyHienTai();
             if (entity == null)
             {
@@ -175,6 +182,16 @@ namespace WebsiteTuyenDung.Controllers
                 ModelState.AddModelError(nameof(model.TenCongTy), "Vui lòng nhập tên công ty.");
             }
 
+            if (!string.IsNullOrWhiteSpace(model.Website) && !IsValidWebsiteUrl(model.Website))
+            {
+                ModelState.AddModelError(nameof(model.Website), "Website không hợp lệ.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.SoDienThoaiLienHe) && !IsValidPhoneNumber(model.SoDienThoaiLienHe))
+            {
+                ModelState.AddModelError(nameof(model.SoDienThoaiLienHe), "Số điện thoại liên hệ không hợp lệ.");
+            }
+
             if (logoFile == null || logoFile.ContentLength <= 0)
             {
                 return;
@@ -189,6 +206,12 @@ namespace WebsiteTuyenDung.Controllers
             if (logoFile.ContentLength > LogoMaxSizeInBytes)
             {
                 ModelState.AddModelError(nameof(model.CurrentLogo), "Dung lượng logo tối đa là 5MB.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(logoFile.ContentType) &&
+                !AllowedLogoContentTypes.Contains(logoFile.ContentType, StringComparer.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError(nameof(model.CurrentLogo), "Nội dung tệp logo phải là ảnh JPG, PNG, GIF hoặc WEBP.");
             }
         }
 
@@ -237,6 +260,30 @@ namespace WebsiteTuyenDung.Controllers
             }
 
             return "https://" + website;
+        }
+
+        private static bool IsValidWebsiteUrl(string website)
+        {
+            var normalizedUrl = NormalizeUrl(website);
+            Uri uri;
+            return Uri.TryCreate(normalizedUrl, UriKind.Absolute, out uri) &&
+                   (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+        }
+
+        private static bool IsValidPhoneNumber(string phoneNumber)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                return true;
+            }
+
+            var value = phoneNumber.Trim();
+            if (value.Length < 8 || value.Length > 20)
+            {
+                return false;
+            }
+
+            return value.All(ch => char.IsDigit(ch) || ch == '+' || ch == '-' || ch == ' ' || ch == '(' || ch == ')' || ch == '.');
         }
 
         protected override void Dispose(bool disposing)

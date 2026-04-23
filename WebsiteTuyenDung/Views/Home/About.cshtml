@@ -1,9 +1,36 @@
-﻿@{
-    ViewBag.Title = "About";
+@{
+    ViewBag.Title = "Giới thiệu";
+    ViewBag.PublicBodyClass = "info-page-area";
 }
-<main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
-    <h3>@ViewBag.Message</h3>
 
-    <p>Use this area to provide additional information.</p>
-</main>
+<section class="info-page">
+    <div class="container">
+        <div class="info-card">
+            <div class="info-hero">
+                <span class="clean-label">VietJob</span>
+                <h1>Giới thiệu</h1>
+                <p>Nền tảng kết nối ứng viên và nhà tuyển dụng tại Việt Nam với luồng tìm việc, đăng tin và theo dõi hồ sơ rõ ràng hơn.</p>
+            </div>
+
+            <div class="info-content">
+                <div class="info-grid">
+                    <div class="info-box">
+                        <i class="bi bi-search"></i>
+                        <h3>Tìm việc dễ hơn</h3>
+                        <p>Lọc công việc theo ngành nghề, địa điểm và loại hình làm việc để ứng viên xem nhanh các vị trí phù hợp.</p>
+                    </div>
+                    <div class="info-box">
+                        <i class="bi bi-building"></i>
+                        <h3>Nhà tuyển dụng rõ ràng</h3>
+                        <p>Thông tin công ty, vị trí tuyển dụng và hạn nộp được trình bày gọn để người dùng dễ đánh giá.</p>
+                    </div>
+                    <div class="info-box">
+                        <i class="bi bi-file-earmark-check"></i>
+                        <h3>Theo dõi hồ sơ</h3>
+                        <p>Ứng viên có thể quản lý CV, nộp hồ sơ và xem trạng thái đơn ngay trong hệ thống.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

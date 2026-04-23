@@ -28,6 +28,7 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(NganhNghe model)
         {
+            model = model ?? new NganhNghe();
             ValidateTen(model?.TenNganhNghe, null);
             if (!ModelState.IsValid)
             {
@@ -61,6 +62,11 @@ namespace WebsiteTuyenDung.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(NganhNghe model)
         {
+            if (model == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
             ValidateTen(model?.TenNganhNghe, model?.NganhNgheId);
             if (!ModelState.IsValid)
             {
@@ -115,6 +121,12 @@ namespace WebsiteTuyenDung.Controllers
             }
 
             var normalized = ten.Trim();
+            if (normalized.Length > 100)
+            {
+                ModelState.AddModelError("TenNganhNghe", "Tên ngành nghề tối đa 100 ký tự.");
+                return;
+            }
+
             var normalizedLower = normalized.ToLower();
             var existed = db.NganhNghes.Any(x =>
                 x.TenNganhNghe.ToLower() == normalizedLower

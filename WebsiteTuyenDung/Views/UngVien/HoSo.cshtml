@@ -1,0 +1,343 @@
+@model WebsiteTuyenDung.Models.ViewModels.UngVienHoSoViewModel
+@{
+    ViewBag.Title = "Hồ sơ của tôi";
+    ViewBag.PublicBodyClass = "candidate-area";
+}
+
+@section styles {
+    <style>
+        .candidate-profile-page {
+            padding: 52px 0 76px;
+            background: #f4f7fa;
+        }
+
+        .candidate-profile-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 22px;
+            margin-bottom: 24px;
+        }
+
+        .candidate-profile-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e12f2f;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .candidate-profile-heading h1 {
+            margin: 0 0 8px;
+            color: #17212b;
+            font-size: clamp(2rem, 3vw, 2.75rem);
+            font-weight: 700;
+            letter-spacing: -.045em;
+        }
+
+        .candidate-profile-heading p {
+            max-width: 560px;
+            margin: 0;
+            color: #64727d;
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        .candidate-profile-quick {
+            flex: 0 0 auto;
+            border: 1px solid #d7dee5;
+            border-radius: 10px;
+            padding: 11px 16px;
+            color: #2f3135;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .candidate-profile-quick:hover,
+        .candidate-profile-quick:focus {
+            border-color: #2f3135;
+            color: #111418;
+            background: #ffffff;
+        }
+
+        .candidate-profile-layout {
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .profile-side-card {
+            border-radius: 18px;
+            padding: 24px;
+            background: #20252a;
+            color: #ffffff;
+        }
+
+        .profile-avatar {
+            width: 58px;
+            height: 58px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            border-radius: 50%;
+            background: #e12f2f;
+            color: #ffffff;
+            font-size: 24px;
+        }
+
+        .profile-side-card h2 {
+            margin: 0 0 10px;
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -.025em;
+        }
+
+        .profile-side-card p {
+            margin: 0 0 22px;
+            color: rgba(255, 255, 255, .66);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .profile-side-list {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .profile-side-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, .78);
+            font-size: 13px;
+        }
+
+        .profile-side-list i {
+            color: #ffffff;
+            font-size: 14px;
+            opacity: .72;
+        }
+
+        .profile-form-card {
+            border: 1px solid #e2e8ee;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .profile-form-card .card-header {
+            padding: 22px 24px;
+            border-bottom: 1px solid #edf1f4;
+            background: #ffffff;
+        }
+
+        .profile-form-card .card-header h4 {
+            color: #17212b;
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: -.025em;
+        }
+
+        .profile-form-card .card-header p {
+            color: #7a8791 !important;
+            font-size: 13px;
+        }
+
+        .profile-form-card .card-body {
+            padding: 24px;
+        }
+
+        .profile-form .form-label {
+            margin-bottom: 8px;
+            color: #37424b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .profile-form .form-control,
+        .profile-form .form-select {
+            min-height: 46px;
+            border: 1px solid #dce3e9;
+            border-radius: 10px;
+            color: #17212b;
+            font-size: 14px;
+            font-weight: 400;
+            box-shadow: none;
+        }
+
+        .profile-form textarea.form-control {
+            padding-top: 12px;
+        }
+
+        .profile-form .form-control:focus,
+        .profile-form .form-select:focus {
+            border-color: #2f3135;
+            box-shadow: 0 0 0 3px rgba(47, 49, 53, .08);
+        }
+
+        .profile-form .form-control::placeholder {
+            color: #9aa5ae;
+            font-weight: 300;
+        }
+
+        .profile-actions {
+            padding-top: 4px;
+        }
+
+        .btn-profile-save {
+            border: 1px solid #2f3135;
+            border-radius: 10px;
+            background: #2f3135;
+            color: #ffffff;
+            font-weight: 500;
+            box-shadow: none;
+        }
+
+        .btn-profile-save:hover,
+        .btn-profile-save:focus {
+            border-color: #1f2327;
+            background: #1f2327;
+            color: #ffffff;
+        }
+
+        .btn-profile-secondary {
+            border: 1px solid #d7dee5;
+            border-radius: 10px;
+            color: #2f3135;
+            font-weight: 500;
+            background: #ffffff;
+        }
+
+        .btn-profile-secondary:hover,
+        .btn-profile-secondary:focus {
+            border-color: #2f3135;
+            color: #111418;
+            background: #f8fafc;
+        }
+
+        @@media (max-width: 991.98px) {
+            .candidate-profile-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .candidate-profile-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .candidate-profile-page {
+                padding: 38px 0 58px;
+            }
+
+            .profile-form-card .card-header,
+            .profile-form-card .card-body,
+            .profile-side-card {
+                padding: 20px;
+            }
+        }
+    </style>
+}
+
+<section class="candidate-profile-page">
+    <div class="container">
+        <div class="candidate-profile-heading">
+            <div>
+                <span class="candidate-profile-label">Ứng viên</span>
+                <h1>Quản lý hồ sơ</h1>
+                <p>Cập nhật thông tin cá nhân để hồ sơ ứng tuyển rõ ràng, gọn và dễ theo dõi hơn.</p>
+            </div>
+            <a href="@Url.Action("Index", "Job")" class="candidate-profile-quick">Tìm việc mới</a>
+        </div>
+
+        <div class="candidate-profile-layout">
+            <aside class="profile-side-card">
+                <div class="profile-avatar">
+                    <i class="bi bi-person"></i>
+                </div>
+                <h2>Hồ sơ cá nhân</h2>
+                <p>Thông tin này được dùng khi bạn nộp CV và theo dõi các đơn ứng tuyển.</p>
+                <ul class="profile-side-list">
+                    <li><i class="bi bi-check2-circle"></i> Thông tin liên hệ</li>
+                    <li><i class="bi bi-check2-circle"></i> Mục tiêu nghề nghiệp</li>
+                    <li><i class="bi bi-check2-circle"></i> Học vấn và kinh nghiệm</li>
+                </ul>
+            </aside>
+
+            <div class="profile-form-card card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">Thông tin hồ sơ</h4>
+                    <p class="text-muted mb-0">Điền các thông tin quan trọng nhất cho nhà tuyển dụng.</p>
+                </div>
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("HoSo", "UngVien", FormMethod.Post, new { @class = "profile-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Họ tên</label>
+                            @Html.TextBoxFor(m => m.HoTen, new { @class = "form-control", placeholder = "Nhập họ tên đầy đủ" })
+                            @Html.ValidationMessageFor(m => m.HoTen, "", new { @class = "text-danger small" })
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ngày sinh</label>
+                            @Html.TextBoxFor(m => m.NgaySinh, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Giới tính</label>
+                            @Html.DropDownListFor(
+                                m => m.GioiTinh,
+                                new SelectList(new[]
+                                {
+                                    new { Value = "", Text = "Chọn giới tính" },
+                                    new { Value = "Nam", Text = "Nam" },
+                                    new { Value = "Nữ", Text = "Nữ" },
+                                    new { Value = "Khác", Text = "Khác" }
+                                }, "Value", "Text", Model.GioiTinh),
+                                new { @class = "form-select" })
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại</label>
+                            @Html.TextBoxFor(m => m.SoDienThoai, new { @class = "form-control", placeholder = "Nhập số điện thoại" })
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Địa chỉ</label>
+                            @Html.TextBoxFor(m => m.DiaChi, new { @class = "form-control", placeholder = "Nhập địa chỉ hiện tại" })
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Mục tiêu nghề nghiệp</label>
+                            @Html.TextAreaFor(m => m.MucTieuNgheNghiep, new { @class = "form-control", rows = 3, placeholder = "Mục tiêu công việc ngắn gọn" })
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Học vấn</label>
+                            @Html.TextAreaFor(m => m.HocVan, new { @class = "form-control", rows = 3, placeholder = "Đại học, chuyên ngành, chứng chỉ..." })
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Tóm tắt kinh nghiệm</label>
+                            @Html.TextAreaFor(m => m.TomTatKinhNghiem, new { @class = "form-control", rows = 4, placeholder = "Kinh nghiệm, dự án hoặc kỹ năng nổi bật" })
+                        </div>
+                        <div class="col-12 d-flex gap-3 flex-wrap profile-actions">
+                            <button type="submit" class="btn btn-profile-save px-5">Lưu hồ sơ</button>
+                            <a href="@Url.Action("CV", "UngVien")" class="btn btn-profile-secondary">Đi tới quản lý CV</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,19 +1,36 @@
-﻿@{
-    ViewBag.Title = "Contact";
+@{
+    ViewBag.Title = "Liên hệ";
+    ViewBag.PublicBodyClass = "info-page-area";
 }
-<main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
-    <h3>@ViewBag.Message</h3>
 
-    <address>
-        One Microsoft Way<br />
-        Redmond, WA 98052-6399<br />
-        <abbr title="Phone">P:</abbr>
-        425.555.0100
-    </address>
+<section class="info-page">
+    <div class="container">
+        <div class="info-card">
+            <div class="info-hero">
+                <span class="clean-label">Hỗ trợ</span>
+                <h1>Liên hệ VietJob</h1>
+                <p>Nếu bạn cần hỗ trợ về tài khoản, hồ sơ ứng tuyển hoặc đăng tin tuyển dụng, hãy liên hệ với đội ngũ VietJob.</p>
+            </div>
 
-    <address>
-        <strong>Support:</strong>   <a href="mailto:Support@example.com">Support@example.com</a><br />
-        <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
-    </address>
-</main>
+            <div class="info-content">
+                <div class="info-grid">
+                    <div class="info-box">
+                        <i class="bi bi-geo-alt"></i>
+                        <h3>Văn phòng</h3>
+                        <p>TP. Hồ Chí Minh, Việt Nam</p>
+                    </div>
+                    <div class="info-box">
+                        <i class="bi bi-envelope"></i>
+                        <h3>Email</h3>
+                        <p><a href="mailto:support@vietjob.local">support@vietjob.local</a></p>
+                    </div>
+                    <div class="info-box">
+                        <i class="bi bi-telephone"></i>
+                        <h3>Điện thoại</h3>
+                        <p>0900 000 000</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
