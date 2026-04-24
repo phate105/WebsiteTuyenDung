@@ -221,7 +221,39 @@ namespace WebsiteTuyenDung.Controllers
 
         public ActionResult Search(string keyword = "", string location = "")
         {
-            return RedirectToAction("Index", new { keyword = keyword });
+            keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim();
+            location = string.IsNullOrWhiteSpace(location) ? null : location.Trim();
+
+            int? diaDiemId = null;
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                if (location.Length > 100)
+                {
+                    location = location.Substring(0, 100);
+                }
+
+                var normalizedLocation = location.ToLower();
+                var diaDiem = db.DiaDiems
+                    .Where(x => x.TrangThai)
+                    .ToList()
+                    .FirstOrDefault(x =>
+                        x.TenDiaDiem.ToLower() == normalizedLocation ||
+                        x.TenDiaDiem.ToLower().Contains(normalizedLocation) ||
+                        normalizedLocation.Contains(x.TenDiaDiem.ToLower()));
+
+                if (diaDiem != null)
+                {
+                    diaDiemId = diaDiem.DiaDiemId;
+                }
+                else
+                {
+                    keyword = string.IsNullOrWhiteSpace(keyword)
+                        ? location
+                        : keyword + " " + location;
+                }
+            }
+
+            return RedirectToAction("Index", new { keyword, diaDiemId });
         }
 
         private JobDetailsViewModel BuildJobDetailsViewModel(TinTuyenDung tinTuyenDung)
