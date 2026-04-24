@@ -111,6 +111,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, .08);
             box-shadow: none;
             top: 0 !important;
+            z-index: 1100 !important;
             transition: none !important;
             animation: none !important;
         }
@@ -373,6 +374,13 @@
             height: 10px;
         }
 
+        .nav-account-dropdown::after {
+            left: 0;
+            right: auto;
+            width: 182px;
+            height: 14px;
+        }
+
         .public-navbar .public-nav-actions .btn,
         .public-navbar .public-nav-actions .dropdown-toggle {
             width: auto;
@@ -549,8 +557,16 @@
             border: 1px solid #e5e7eb !important;
             border-radius: 14px;
             background: #ffffff;
+            z-index: 1110 !important;
             box-shadow: 0 16px 38px rgba(15, 23, 42, .12) !important;
             overflow: hidden;
+        }
+
+        .nav-account-dropdown .dropdown-menu {
+            left: 0 !important;
+            right: auto !important;
+            min-width: 182px;
+            margin-top: 4px !important;
         }
 
         .nav-notification-menu {
@@ -1467,7 +1483,7 @@
                                 <div class="nav-notification-empty">Chưa có thông báo mới.</div>
                             </div>
                         </div>
-                        <div class="dropdown">
+                        <div class="dropdown nav-account-dropdown">
                             <button type="button" class="btn btn-light btn-nav-account dropdown-toggle" aria-expanded="false" aria-label="Tài khoản">
                                 <span class="account-chip"><i class="bi bi-person-fill"></i></span>
                             </button>

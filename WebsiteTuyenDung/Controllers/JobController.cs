@@ -145,7 +145,7 @@ namespace WebsiteTuyenDung.Controllers
         [HttpPost]
         [Authorize(Roles = ApplicationRoles.UngVien)]
         [ValidateAntiForgeryToken]
-        public ActionResult Apply(ApplyForJobViewModel model)
+        public ActionResult Apply([Bind(Prefix = "ApplyForm")] ApplyForJobViewModel model)
         {
             model = model ?? new ApplyForJobViewModel();
             if (!ModelState.IsValid)
@@ -154,7 +154,12 @@ namespace WebsiteTuyenDung.Controllers
                     .SelectMany(x => x.Errors)
                     .Select(x => x.ErrorMessage)
                     .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? "Vui lòng kiểm tra lại thông tin ứng tuyển.";
-                return RedirectToAction("Details", new { id = model.TinTuyenDungId });
+                if (model.TinTuyenDungId > 0)
+                {
+                    return RedirectToAction("Details", new { id = model.TinTuyenDungId });
+                }
+
+                return RedirectToAction("Index");
             }
 
             var tinTuyenDung = GetCongViecDangMoQuery().FirstOrDefault(x => x.TinTuyenDungId == model.TinTuyenDungId);
