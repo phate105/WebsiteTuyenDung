@@ -1,0 +1,9 @@
+﻿<!doctype html>
+<html><head><meta charset="utf-8" />
+<style>
+body{font-family:Arial,Helvetica,sans-serif;color:#18212a;line-height:1.5;margin:42px;}h1{font-size:28px;margin:0 0 6px;}h2{font-size:15px;margin:24px 0 8px;padding-bottom:6px;border-bottom:1px solid #d9dee3;text-transform:uppercase;letter-spacing:.05em;}p{margin:0 0 8px}.muted{color:#68727d}.contact{margin:10px 0 22px}.section{margin-bottom:14px}.target{font-size:16px;font-weight:bold;color:#2d3339}.generated{margin-top:28px;font-size:11px;color:#8a939c}
+</style></head><body>
+<h1>Ung vien tao CV</h1><p class="target">Nhan vien phan mem</p><div class="contact muted">0901234567 | cv_20260502150429107_47ab1fbc87d747ba98f2d0aa9aa2da62@test.com | Ha Noi</div>
+<div class="section"><h2>Mục ti&#234;u nghề nghiệp</h2><p>Tim cong viec phu hop va phat trien lau dai.</p></div><div class="section"><h2>Kỹ năng ch&#237;nh</h2><p>C#</p>
+<p>ASP.NET MVC</p>
+<p>SQL Server</p></div><div class="section"><h2>Kinh nghiệm</h2><p>Da thuc hien cac bai tap lon ve website tuyen dung.</p></div><div class="section"><h2>Học vấn</h2><p>Dai hoc Cong nghe thong tin.</p></div><p class="generated">CV được tạo từ VietJob ngày 02/05/2026 22:04</p></body></html>

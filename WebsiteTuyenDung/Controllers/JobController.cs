@@ -145,7 +145,7 @@ namespace WebsiteTuyenDung.Controllers
         [HttpPost]
         [Authorize(Roles = ApplicationRoles.UngVien)]
         [ValidateAntiForgeryToken]
-        public ActionResult Apply(ApplyForJobViewModel model)
+        public ActionResult Apply([Bind(Prefix = "ApplyForm")] ApplyForJobViewModel model)
         {
             model = model ?? new ApplyForJobViewModel();
             if (!ModelState.IsValid)
@@ -154,7 +154,12 @@ namespace WebsiteTuyenDung.Controllers
                     .SelectMany(x => x.Errors)
                     .Select(x => x.ErrorMessage)
                     .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? "Vui lòng kiểm tra lại thông tin ứng tuyển.";
-                return RedirectToAction("Details", new { id = model.TinTuyenDungId });
+                if (model.TinTuyenDungId > 0)
+                {
+                    return RedirectToAction("Details", new { id = model.TinTuyenDungId });
+                }
+
+                return RedirectToAction("Index");
             }
 
             var tinTuyenDung = GetCongViecDangMoQuery().FirstOrDefault(x => x.TinTuyenDungId == model.TinTuyenDungId);
@@ -221,7 +226,39 @@ namespace WebsiteTuyenDung.Controllers
 
         public ActionResult Search(string keyword = "", string location = "")
         {
-            return RedirectToAction("Index", new { keyword = keyword });
+            keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim();
+            location = string.IsNullOrWhiteSpace(location) ? null : location.Trim();
+
+            int? diaDiemId = null;
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                if (location.Length > 100)
+                {
+                    location = location.Substring(0, 100);
+                }
+
+                var normalizedLocation = location.ToLower();
+                var diaDiem = db.DiaDiems
+                    .Where(x => x.TrangThai)
+                    .ToList()
+                    .FirstOrDefault(x =>
+                        x.TenDiaDiem.ToLower() == normalizedLocation ||
+                        x.TenDiaDiem.ToLower().Contains(normalizedLocation) ||
+                        normalizedLocation.Contains(x.TenDiaDiem.ToLower()));
+
+                if (diaDiem != null)
+                {
+                    diaDiemId = diaDiem.DiaDiemId;
+                }
+                else
+                {
+                    keyword = string.IsNullOrWhiteSpace(keyword)
+                        ? location
+                        : keyword + " " + location;
+                }
+            }
+
+            return RedirectToAction("Index", new { keyword, diaDiemId });
         }
 
         private JobDetailsViewModel BuildJobDetailsViewModel(TinTuyenDung tinTuyenDung)

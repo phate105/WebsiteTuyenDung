@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+		<PackageReference Include="Microsoft.Playwright.MSTest" Version="1.59.0" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.6.4" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\WebsiteTuyenDung\Models\ViewModels\AccountAuthViewModels.cs" Link="SourceUnderTest\AccountAuthViewModels.cs" />
+		<Compile Include="..\WebsiteTuyenDung\Models\Constants\HanhDongDuyetTin.cs" Link="SourceUnderTest\HanhDongDuyetTin.cs" />
+		<Compile Include="..\WebsiteTuyenDung\Models\Constants\TrangThaiDonUngTuyen.cs" Link="SourceUnderTest\TrangThaiDonUngTuyen.cs" />
+		<Compile Include="..\WebsiteTuyenDung\Models\Constants\TrangThaiTinTuyenDung.cs" Link="SourceUnderTest\TrangThaiTinTuyenDung.cs" />
+	</ItemGroup>
+
+</Project>
