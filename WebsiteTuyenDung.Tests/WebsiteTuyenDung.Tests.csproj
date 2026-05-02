@@ -15,4 +15,11 @@
 		<PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="..\WebsiteTuyenDung\Models\ViewModels\AccountAuthViewModels.cs" Link="SourceUnderTest\AccountAuthViewModels.cs" />
+		<Compile Include="..\WebsiteTuyenDung\Models\Constants\HanhDongDuyetTin.cs" Link="SourceUnderTest\HanhDongDuyetTin.cs" />
+		<Compile Include="..\WebsiteTuyenDung\Models\Constants\TrangThaiDonUngTuyen.cs" Link="SourceUnderTest\TrangThaiDonUngTuyen.cs" />
+		<Compile Include="..\WebsiteTuyenDung\Models\Constants\TrangThaiTinTuyenDung.cs" Link="SourceUnderTest\TrangThaiTinTuyenDung.cs" />
+	</ItemGroup>
+
 </Project>
