@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="WebsiteTuyenDung/WebsiteTuyenDung.csproj" Id="60dbafb0-c889-4cea-b8dd-badefc3ec9ec" />
   <Project Path="WebsiteTuyenDung.Tests/WebsiteTuyenDung.Tests.csproj" />
+  <Project Path="WebsiteTuyenDung/WebsiteTuyenDung.csproj" Id="60dbafb0-c889-4cea-b8dd-badefc3ec9ec" />
 </Solution>

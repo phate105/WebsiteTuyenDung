@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "WebsiteTuyenDung",
+    "Projects": [
+      {
+        "Path": "WebsiteTuyenDung\\WebsiteTuyenDung.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
